@@ -5,7 +5,8 @@ import (
 	//"log"
 	//"net/http"
 	//"encoding/json"
-	"backend/regex" // Importa el paquete regex
+	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/utils"
+	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/regex" 
 )
 
 func main() {

@@ -7,7 +7,7 @@ This code is a package that contains a function to format a regex string into a 
 
 import (
 	"fmt"
-	"lenguagePr/utils"
+	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/utils"
 )
 
 // Function to pass infix a postfix
@@ -38,7 +38,7 @@ func InfixToPostfix(regex string) []interface{} {
 			if len(stack) > 0 {
 				stack = stack[:len(stack)-1]
 			}
-		} else if contains(operators, infix[i]) {
+		} else if utils.contains(operators, infix[i]) {
 			for len(stack) > 0 && precedence[stack[len(stack)-1].(string)] >= precedence[infix[i].(string)] {
 				result = append(result, stack[len(stack)-1])
 				stack = stack[:len(stack)-1]

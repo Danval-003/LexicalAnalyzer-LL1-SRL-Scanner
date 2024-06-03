@@ -3,7 +3,7 @@ package regex
 import (
 	"fmt"
 	// Import the utils package
-	"lenguagePr/utils"
+	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/utils"
 )
 
 // balanceExp function checks if the parentheses and square brackets are balanced in the regex
@@ -97,7 +97,7 @@ func balanceExp(regex string) ([]rune, bool) {
 				}
 				result = append(result, runes[i])
 			} else {
-				if contains([]string{"|", "*", "+", "?"}, string(runes[i])) {
+				if utils.contains([]string{"|", "*", "+", "?"}, string(runes[i])) {
 					result = append(result, runes[i])
 				} else if runes[i] == '\\' {
 					result = append(result, runes[i])
@@ -150,7 +150,7 @@ func makeSet(start int, end int, runes []rune) []rune {
 					// Iterate over the runes, including the runes
 					for j := last + 1; j <= next; j++ {
 						// Verify if not repeated
-						if !containsRune(result, j) {
+						if !utils.contains(result, j) {
 							result = append(result, j)
 						}
 					}
@@ -158,7 +158,7 @@ func makeSet(start int, end int, runes []rune) []rune {
 			}
 		} else {
 			// Verify if not repeated
-			if !containsRune(result, runes[i]) {
+			if !utils.containsRune(result, runes[i]) {
 				result = append(result, runes[i])
 			}
 		}
@@ -182,9 +182,9 @@ func setDifference(set1 []rune, set2 []rune) []rune {
 	var result []rune
 	// Iterate over the runes
 	for i := 0; i < len(set1); i++ {
-		if !containsRune(set2, set1[i]) {
+		if !utils.containsRune(set2, set1[i]) {
 			// Verify if not repeated
-			if !containsRune(result, set1[i]) {
+			if !utils.containsRune(result, set1[i]) {
 				result = append(result, set1[i])
 			}
 		}
@@ -217,7 +217,7 @@ func FormatRegex(regexTex string) []interface{} {
 		} else {
 			if runes[i] == '(' {
 				if len(result) > 0 {
-					if !contains(operators, result[len(result)-1]) {
+					if !utils.contains(operators, result[len(result)-1]) {
 						// append the pipe to the result, to string
 						result = append(result, ".")
 					}
@@ -267,7 +267,7 @@ func FormatRegex(regexTex string) []interface{} {
 				}
 
 				if len(result) > 0 {
-					if !contains(operators, result[len(result)-1]) {
+					if !utils.contains(operators, result[len(result)-1]) {
 						// append the pipe to the result, to string
 						result = append(result, ".")
 					}
@@ -294,7 +294,7 @@ func FormatRegex(regexTex string) []interface{} {
 				} else if runes[i] == '+' {
 					// Verify if the last rune is not a operator, (not in the set operators)
 					if len(result) > 0 {
-						if !contains(operators, result[len(result)-1]) {
+						if !utils.contains(operators, result[len(result)-1]) {
 							// Obtain the last element and pop
 							last := result[len(result)-1]
 							result = result[:len(result)-1]
@@ -310,7 +310,7 @@ func FormatRegex(regexTex string) []interface{} {
 				} else if runes[i] == '?' {
 					// Verify if the last rune is not a operator, (not in the set operators)
 					if len(result) > 0 {
-						if !contains(operators, result[len(result)-1]) {
+						if !utils.contains(operators, result[len(result)-1]) {
 							// Obtain the last element and pop
 							last := result[len(result)-1]
 							result = result[:len(result)-1]
@@ -325,7 +325,7 @@ func FormatRegex(regexTex string) []interface{} {
 				} else {
 					// Verify if the last rune is not a operator, (not in the set operators)
 					if len(result) > 0 {
-						if !contains(operators, result[len(result)-1]) {
+						if !utils.contains(operators, result[len(result)-1]) {
 							// append the pipe to the result, to string
 							result = append(result, ".")
 						}
