@@ -5,7 +5,7 @@ import (
 	//"log"
 	//"net/http"
 	//"encoding/json"
-	"lenguagePr/regex" // Importa el paquete regex
+	"backend/regex" // Importa el paquete regex
 )
 
 func main() {

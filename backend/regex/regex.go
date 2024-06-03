@@ -7,6 +7,7 @@ This code is a package that contains a function to format a regex string into a 
 
 import (
 	"fmt"
+	"lenguagePr/utils"
 )
 
 // Function to pass infix a postfix
