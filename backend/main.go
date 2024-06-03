@@ -5,7 +5,7 @@ import (
 	//"log"
 	//"net/http"
 	//"encoding/json"
-	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated" 
+	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex" 
 )
 
 func main() {

@@ -12,6 +12,16 @@ import (
 	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated"
 )
 
+// Function to verify if a string is in a slice of strings
+func Contains(s []string, e interface{}) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
 // Function to pass infix a postfix
 func InfixToPostfix(regex string) []interface{} {
 	infix := regexFormated.FormatRegex(regex)
@@ -40,7 +50,7 @@ func InfixToPostfix(regex string) []interface{} {
 			if len(stack) > 0 {
 				stack = stack[:len(stack)-1]
 			}
-		} else if regexFormated.Contains(operators, infix[i]) {
+		} else if Contains(operators, infix[i]) {
 			for len(stack) > 0 && precedence[stack[len(stack)-1].(string)] >= precedence[infix[i].(string)] {
 				result = append(result, stack[len(stack)-1])
 				stack = stack[:len(stack)-1]
