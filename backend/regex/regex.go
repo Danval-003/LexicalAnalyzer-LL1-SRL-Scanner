@@ -1,4 +1,6 @@
+// regex.go
 package regex
+
 /*
 Daniel Armando Valdez Reyes | Danval-003
 Description: 
@@ -7,22 +9,22 @@ This code is a package that contains a function to format a regex string into a 
 
 import (
 	"fmt"
-	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/utils"
+	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/regex/regexFormated"
 )
 
 // Function to pass infix a postfix
 func InfixToPostfix(regex string) []interface{} {
-	infix:= FormatRegex(regex)
+	infix := regexFormated.FormatRegex(regex)
 	fmt.Println(infix)
 	// Create a slice to store the result
 	result := []interface{}{}
 	// Create a stack to store the operators
 	stack := []interface{}{}
 	// Create a set of string to be used as operators
-	operators := []string{"|", "(","[", "*", "."}
+	operators := []string{"|", "(", "[", "*", "."}
 	// Create a map to operators with precedence
 	precedence := map[string]int{
-		"(": 1, ")": 1, "[": 1, "]": 1, "|": 2, ".": 3, "*": 4, 
+		"(": 1, ")": 1, "[": 1, "]": 1, "|": 2, ".": 3, "*": 4,
 	}
 
 	// Iterate over the infix
@@ -38,7 +40,7 @@ func InfixToPostfix(regex string) []interface{} {
 			if len(stack) > 0 {
 				stack = stack[:len(stack)-1]
 			}
-		} else if utils.contains(operators, infix[i]) {
+		} else if regexFormated.Contains(operators, infix[i]) {
 			for len(stack) > 0 && precedence[stack[len(stack)-1].(string)] >= precedence[infix[i].(string)] {
 				result = append(result, stack[len(stack)-1])
 				stack = stack[:len(stack)-1]
