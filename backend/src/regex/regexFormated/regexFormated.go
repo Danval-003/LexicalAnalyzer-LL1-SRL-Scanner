@@ -1,8 +1,7 @@
-package package regexFormated
+package regexFormated
 
 import (
 	"fmt"
-	
 )
 
 // Function to verify if a string is in a slice of strings

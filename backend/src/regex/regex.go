@@ -9,7 +9,7 @@ This code is a package that contains a function to format a regex string into a 
 
 import (
 	"fmt"
-	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/regex/regexFormated"
+	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated"
 )
 
 // Function to pass infix a postfix
