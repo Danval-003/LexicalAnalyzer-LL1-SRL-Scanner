@@ -1,4 +1,4 @@
-package main
+package tree
 
 import (
 	"fmt"
@@ -26,6 +26,7 @@ type Node struct {
 	Nullable bool        `json:"Nullable"`
 
 	First  []*Node `json:"First"`
+	Last   []*Node `json:"Last"`
 	Follow []*Node `json:"Follow"`
 }
 
@@ -64,6 +65,13 @@ func makeTree(regex_ string) *Node  {
 			} else {
 				node.First = stack[len(stack)-2].First
 			}
+
+			// Calc Last
+			if stack[len(stack)-1].Nullable {
+				node.Last = append(stack[len(stack)-2].Last, stack[len(stack)-1].Last...)
+			} else {
+				node.Last = stack[len(stack)-1].Last
+			}
 			// Pop the last two elements
 			stack = stack[:len(stack)-2]
 			// Append the node to the stack
@@ -74,6 +82,8 @@ func makeTree(regex_ string) *Node  {
 			node := &Node{Value: "|", Left: stack[len(stack)-2], Right: stack[len(stack)-1], Ident: NumberToLetter(symbol)}
 			// Calc First
 			node.First = append(stack[len(stack)-2].First, stack[len(stack)-1].First...)
+			// Calc Last
+			node.Last = append(stack[len(stack)-2].Last, stack[len(stack)-1].Last...)
 			// Pop the last two elements
 			stack = stack[:len(stack)-2]
 			node.Nullable = node.Left.Nullable || node.Right.Nullable
@@ -85,6 +95,8 @@ func makeTree(regex_ string) *Node  {
 			node := &Node{Value: "*", Left: stack[len(stack)-1], Ident: NumberToLetter(symbol)}
 			// Calc First
 			node.First = stack[len(stack)-1].First
+			// Calc Last
+			node.Last = stack[len(stack)-1].Last
 			// Set nullable
 			node.Nullable = true
 			// Pop the last element
@@ -102,6 +114,8 @@ func makeTree(regex_ string) *Node  {
 			}
 			// Calc First
 			node.First = append(node.First, node)
+			// Calc Last
+			node.Last = append(node.Last, node)
 
 			// Append the node to the stack
 			stack = append(stack, node)
@@ -114,9 +128,14 @@ func makeTree(regex_ string) *Node  {
 
 func calcFollow(n *Node){
 	if n.Value == "." {
-
+		for _, node := range n.Left.Last {
+			node.Follow = append(node.Follow, n.Right.First...)
+		}
+	} else if n.Value == "*" {
+		for _, node := range n.Last {
+			node.Follow = append(node.Follow, n.First...)
+		}
 	}
-
 
 	if n.Left != nil {
 		calcFollow(n.Left)
@@ -134,6 +153,7 @@ func (n *Node) String() string {
 func nodeToJson(n *Node) string {
 	// Convert the node to json
 	jsonNode, _ := json.Marshal(n)
+	fmt.Println(string(jsonNode))
 	return string(jsonNode)
 }
 
@@ -192,16 +212,4 @@ func toGraph(n *Node){
 
 }
 
-func main(){
-
-	// Create a new tree
-	tree := makeTree("cb*c")
-	// Convert the tree to json
-	jsonTree := nodeToJson(tree)
-	// Print the json
-	fmt.Println(jsonTree)
-	// Convert the tree to a graph
-	toGraph(tree)
-
-}
 

@@ -1,4 +1,14 @@
 digraph AST {
+	Nb->N1;
+	Na->N2;
+	Nb->Na;
+	Nc->Nb;
+	Nc->N3;
 	N1 [ label="99" ];
+	N2 [ label="98" ];
+	N3 [ label="99" ];
+	Na [ label="*" ];
+	Nb [ label="." ];
+	Nc [ label="." ];
 
 }
