@@ -41,15 +41,12 @@ func NumberToLetter(num int) string {
 }
 
 
-func MakeTree(regex_ string) *Node  {
+func MakeTree(regex_ string, token string, counter int, symbol int) (*Node, int, int)  {
 	// Convert the infix to postfix
 	postfix := regex.InfixToPostfix(regex_)
 	fmt.Println(postfix)
 	// Create a stack to store the nodes
 	stack := []*Node{}
-
-	counter := 0
-	symbol:= 0
 
 	// Iterate over the postfix
 	for i := 0; i < len(postfix); i++ {
@@ -122,11 +119,33 @@ func MakeTree(regex_ string) *Node  {
 		}
 	}
 
+	// Create a token node
+	tokenNode := &Node{Value: token, Ident: "TK"+strconv.Itoa(counter)+"", Nullable: false}
+	tokenNode.First = append(tokenNode.First, tokenNode)
+	tokenNode.Last = append(tokenNode.Last, tokenNode)
+	// Create a new node
+	node := &Node{Value: ".", Left: stack[0] , Right: tokenNode, Ident: "T"+strconv.Itoa(counter)}
+
+	// Calc nullable
+	node.Nullable = stack[0].Nullable && tokenNode.Nullable
+	// Calc First
+	if stack[0].Nullable {
+		node.First = append(stack[0].First, tokenNode.First...)
+	} else {
+		node.First = stack[0].First
+	}
+	// Calc Last
+	if tokenNode.Nullable {
+		node.Last = append(tokenNode.Last, stack[0].Last...)
+	} else {
+		node.Last = tokenNode.Last
+	}
+
 	// Calc Follow
-	CalcFollow(stack[0])
+	CalcFollow(node)
 
 	// Return the last element
-	return stack[0]
+	return node, counter, symbol
 }
 
 func CalcFollow(n *Node){
@@ -216,4 +235,28 @@ func ToGraph(n *Node){
 
 }
 
+
+func MakeTreeFromMap(Tokens map[string]string) {
+	// Define counter
+	counter := 0
+	symbol := 0
+	var topTree *Node
+	// Iterate over the Tokens
+	for key, value := range Tokens {
+		// Create a tree
+		var topTree2 *Node
+		topTree2, counter, symbol = MakeTree(value, key, counter, symbol)
+		fmt.Println(counter)
+		if topTree == nil {
+			topTree = topTree2
+		} else {
+			topTree = &Node{Value: "|", Left: topTree, Right: topTree2, Ident: "O"+strconv.Itoa(counter)}
+			topTree.Nullable = topTree.Left.Nullable || topTree.Right.Nullable
+			topTree.First = append(topTree.Left.First, topTree.Right.First...)
+			topTree.Last = append(topTree.Left.Last, topTree.Right.Last...)
+			CalcFollow(topTree)
+		}
+	}
+
+}
 

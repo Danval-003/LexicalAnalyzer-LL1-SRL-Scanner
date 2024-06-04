@@ -1,14 +1,32 @@
 digraph AST {
-	Nb->N1;
+	Na->N1;
 	Na->N2;
 	Nb->Na;
-	Nc->Nb;
-	Nc->N3;
-	N1 [ label="99" ];
+	Nb->N3;
+	NT3->Nb;
+	NT3->NTK3;
+	NO6->NT3;
+	Nc->N4;
+	Nc->N5;
+	Nd->Nc;
+	Nd->N6;
+	NT6->Nd;
+	NT6->NTK6;
+	NO6->NT6;
+	N1 [ label="97" ];
 	N2 [ label="98" ];
 	N3 [ label="99" ];
-	Na [ label="*" ];
+	N4 [ label="49" ];
+	N5 [ label="50" ];
+	N6 [ label="51" ];
+	NO6 [ label="|" ];
+	NT3 [ label="." ];
+	NT6 [ label="." ];
+	NTK3 [ label="ID" ];
+	NTK6 [ label="NUM" ];
+	Na [ label="." ];
 	Nb [ label="." ];
 	Nc [ label="." ];
+	Nd [ label="." ];
 
 }
