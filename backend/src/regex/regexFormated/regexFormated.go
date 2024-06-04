@@ -1,7 +1,6 @@
 package regexFormated
 
 import (
-	"embed"
 	"fmt"
 )
 
