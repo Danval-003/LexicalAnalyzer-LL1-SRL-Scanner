@@ -197,6 +197,7 @@ func ToGraph(n *Node){
 	f.WriteString(graphAst.String())
 	// Close the file
 	f.Close()
+	
 
 	// Make a pdf to visualize the graph
 	cmd := "dot -Tpdf ast.dot -o ast.pdf"
