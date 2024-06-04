@@ -45,7 +45,7 @@ func EvalAlphabet(alphabet *[]rune, toeval []interface{}) {
 	// Iter over interface
 	for _, v := range toeval {
 		switch val := v.(type) {
-			case rune:
+			case int32:
 				if !regexFormated.ContainsRune(*alphabet, val) {
 					// Append the value to the alphabet
 					*alphabet = append(*alphabet, val)
