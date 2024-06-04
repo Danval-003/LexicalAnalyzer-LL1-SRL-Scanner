@@ -224,7 +224,7 @@ func FormatRegex(regexTex string) []interface{} {
 
 	// Create a set of string to be used as operators
 	operators := []string{"|", "(","[", "."}
-	var end_index int
+	end_index :=1 
 	var tempIndex [] int
 	tempIndex = append(tempIndex, 0)
 
@@ -248,10 +248,12 @@ func FormatRegex(regexTex string) []interface{} {
 					}
 				}
 				result = append(result, "(")
+				tempIndex[len(tempIndex)-1] = len(result)-1
 				tempIndex = append(tempIndex, len(result)-1)
 			} else if runes[i] == ')' {
 				result = append(result, ")")
 				end_index = len(result)
+				tempIndex = tempIndex[:len(tempIndex)-1]
 			} else if runes[i] == '[' {
 				start:= i+1
 				end := 0
@@ -314,8 +316,11 @@ func FormatRegex(regexTex string) []interface{} {
 
 			} else{
 				if runes[i] == '|' {
-					// Obtain the last element and pop
-					last := result[tempIndex[len(tempIndex)-1]:end_index]
+					// Copy the last elements into last
+					var last []interface{}
+					for j := tempIndex[len(tempIndex)-1]; j < end_index; j++ {
+						last = append(last, result[j])
+					}
 					result = result[:tempIndex[len(tempIndex)-1]]
 					// Append the pipe to the result, to string
 					result = append(result, "(")
@@ -324,8 +329,12 @@ func FormatRegex(regexTex string) []interface{} {
 					result = append(result, ")")
 					result = append(result, "|")
 				} else if runes[i] == '*' {
-					// Obtain the last element and pop
-					last := result[tempIndex[len(tempIndex)-1]:end_index]
+					// Copy the last elements into last
+					var last []interface{}
+					for j := tempIndex[len(tempIndex)-1]; j < end_index; j++ {
+						last = append(last, result[j])
+					}
+					fmt.Println(last)
 					result = result[:tempIndex[len(tempIndex)-1]]
 					// Append the pipe to the result, to string
 					result = append(result, "(")
@@ -333,23 +342,33 @@ func FormatRegex(regexTex string) []interface{} {
 					result = append(result, last...)
 					result = append(result, ")")
 					result = append(result, "*")
+					end_index = len(result)
 				} else if runes[i] == '+' {
 					// Verify if the last rune is not a operator, (not in the set operators)
 					if len(result) > 0 {
 						if !Contains([]string{"|", "(","[", ".", "*"}, result[len(result)-1]) {
-							// Obtain the last element and pop
-							last := result[tempIndex[len(tempIndex)-1]:end_index]
+							// Copy the last elements into last
+							var last []interface{}
+							for j := tempIndex[len(tempIndex)-1]; j < end_index; j++ {
+								last = append(last, result[j])
+							}
+							fmt.Println(last)
 							result = result[:tempIndex[len(tempIndex)-1]]
+							fmt.Println(last...)
 							
 							result = append(result, "(")
+							fmt.Println(last...)
 							tempIndex[len(tempIndex)-1] = len(result)-1
+							fmt.Println(last...)
 							result = append(result, "(")
 							result = append(result, last...)
+							fmt.Println(last...)
 							result = append(result, ")")
 							result = append(result, ".")
 							result = append(result, "(")
 							result = append(result, last...)
 							result = append(result, ")")
+							result = append(result, "*")
 							result = append(result, ")")
 							end_index = len(result)
 						}
@@ -358,8 +377,11 @@ func FormatRegex(regexTex string) []interface{} {
 					// Verify if the last rune is not a operator, (not in the set operators)
 					if len(result) > 0 {
 						if !Contains([]string{"|", "(","[", ".", "*"}, result[len(result)-1]) {
-							// Obtain the last element and pop
-							last := result[tempIndex[len(tempIndex)-1]:end_index]
+							// Copy the last elements into last
+							var last []interface{}
+							for j := tempIndex[len(tempIndex)-1]; j < end_index; j++ {
+								last = append(last, result[j])
+							}
 							result = result[:tempIndex[len(tempIndex)-1]]
 							
 							result = append(result, "(")
