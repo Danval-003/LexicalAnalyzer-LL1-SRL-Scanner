@@ -16,9 +16,11 @@ type State struct {
 
 func MakeAFD(Tokens map[string]string) {
 
-	treeA := tree.MakeTreeFromMap(Tokens)
+	treeA, alphabet := tree.MakeTreeFromMap(Tokens)
+	fmt.Println(alphabet)
 
-	
+	tree.ToGraph(treeA)
+
 
 }
 

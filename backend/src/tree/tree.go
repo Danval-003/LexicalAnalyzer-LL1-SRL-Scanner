@@ -44,13 +44,14 @@ func NumberToLetter(num int) string {
 func EvalAlphabet(alphabet *[]rune, toeval []interface{}) {
 	// Iter over interface
 	for _, v := range toeval {
-		// Check if the value is a rune not string
-		if _, ok := v.(string); ok {
-			// Check if the value is not in the alphabet
-			if !regexFormated.ContainsRune(*alphabet, v.(rune)) {
-				// Append the value to the alphabet
-				*alphabet = append(*alphabet, v.(rune))
-			}
+		switch val := v.(type) {
+			case rune:
+				if !regexFormated.ContainsRune(*alphabet, val) {
+					// Append the value to the alphabet
+					*alphabet = append(*alphabet, val)
+				}
+			default:
+				break
 		}
 	}
 }
