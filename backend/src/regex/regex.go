@@ -1,5 +1,5 @@
 // regex.go
-package main
+package regex
 
 /*
 Daniel Armando Valdez Reyes | Danval-003
@@ -58,11 +58,4 @@ func InfixToPostfix(regex string) []interface{} {
 	}
 
 	return result
-}
-
-
-func main(){
-	// Llamar a la función FormatRegex desde el paquete regex
-	result := InfixToPostfix("cb*d")
-	fmt.Println(result)
 }
