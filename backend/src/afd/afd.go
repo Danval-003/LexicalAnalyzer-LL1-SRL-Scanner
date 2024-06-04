@@ -18,6 +18,8 @@ func MakeAFD(Tokens map[string]string) {
 
 	treeA := tree.MakeTreeFromMap(Tokens)
 
+	
+
 }
 
 

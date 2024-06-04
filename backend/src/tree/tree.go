@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex"
+	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated"
 
 	// Import json
 	"encoding/json"
@@ -40,10 +41,26 @@ func NumberToLetter(num int) string {
     }
 }
 
+func EvalAlphabet(alphabet *[]rune, toeval []interface{}) {
+	// Iter over interface
+	for _, v := range toeval {
+		// Check if the value is a rune not string
+		if _, ok := v.(string); ok {
+			// Check if the value is not in the alphabet
+			if !regexFormated.ContainsRune(*alphabet, v.(rune)) {
+				// Append the value to the alphabet
+				*alphabet = append(*alphabet, v.(rune))
+			}
+		}
+	}
+}
 
-func MakeTree(regex_ string, token string, counter int, symbol int) (*Node, int, int)  {
+
+func MakeTree(regex_ string, token string, counter int, symbol int, alphabet *[]rune) (*Node, int, int)  {
 	// Convert the infix to postfix
 	postfix := regex.InfixToPostfix(regex_)
+	// Eval the alphabet
+	EvalAlphabet(alphabet, postfix)
 	fmt.Println(postfix)
 	// Create a stack to store the nodes
 	stack := []*Node{}
@@ -236,16 +253,19 @@ func ToGraph(n *Node){
 }
 
 
-func MakeTreeFromMap(Tokens map[string]string) *Node {
+func MakeTreeFromMap(Tokens map[string]string) (*Node, []rune) {
 	// Define counter
 	counter := 0
 	symbol := 0
+	// Create a Alphabet rune
+	var alphabet []rune
+
 	var topTree *Node
 	// Iterate over the Tokens
 	for key, value := range Tokens {
 		// Create a tree
 		var topTree2 *Node
-		topTree2, counter, symbol = MakeTree(value, key, counter, symbol)
+		topTree2, counter, symbol = MakeTree(value, key, counter, symbol, &alphabet)
 		fmt.Println(counter)
 		if topTree == nil {
 			topTree = topTree2
@@ -259,6 +279,6 @@ func MakeTreeFromMap(Tokens map[string]string) *Node {
 	}
 
 	// Return the top tree
-	return topTree
+	return topTree, alphabet
 }
 

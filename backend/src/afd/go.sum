@@ -10,11 +10,15 @@ github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFor
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated v0.0.0-20240604062235-97d288764a3a/go.mod h1:mKyg0JsUTqmMRoGuC07Sr7mnyDZqHDj/sz0pO/Qvfgo=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated v0.0.0-20240604072836-064ecf3cbf87 h1:Q0Y6/d2cSxLNQ+zlzKwWddJDEA+gFu8K0BZ04QHbABc=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated v0.0.0-20240604072836-064ecf3cbf87/go.mod h1:mKyg0JsUTqmMRoGuC07Sr7mnyDZqHDj/sz0pO/Qvfgo=
+github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated v0.0.0-20240604165851-ebce278808ba h1:1g6pRdBGnkvz90ymQA4qDfB8goVNeVF6HUypDGT1nzg=
+github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated v0.0.0-20240604165851-ebce278808ba/go.mod h1:mKyg0JsUTqmMRoGuC07Sr7mnyDZqHDj/sz0pO/Qvfgo=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/tree v0.0.0-20240604055423-b6a43e28668d h1:wPYOe6njYTxKRjvfG6rNRQtkBf56EVaYhtj+78nklSE=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/tree v0.0.0-20240604055423-b6a43e28668d/go.mod h1:fK6jmNQYTXKaWWIAqjBXdC6oMK+OLT61HyV5YwQNoq4=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/tree v0.0.0-20240604062235-97d288764a3a h1:Wz/HPiNKGs59biqmh0FqCvpaZbTjsdvpe0yi4+12xS0=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/tree v0.0.0-20240604062235-97d288764a3a/go.mod h1:fK6jmNQYTXKaWWIAqjBXdC6oMK+OLT61HyV5YwQNoq4=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/tree v0.0.0-20240604072836-064ecf3cbf87 h1:6lQj08/37154kqFa2TB5t2Vugs9fjJF5+uHvgr0HytI=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/tree v0.0.0-20240604072836-064ecf3cbf87/go.mod h1:fK6jmNQYTXKaWWIAqjBXdC6oMK+OLT61HyV5YwQNoq4=
+github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/tree v0.0.0-20240604165851-ebce278808ba h1:culcjRWPrskC1UtkU+nRadCOWfYb/gUVFwrpMNSrpJQ=
+github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/tree v0.0.0-20240604165851-ebce278808ba/go.mod h1:fK6jmNQYTXKaWWIAqjBXdC6oMK+OLT61HyV5YwQNoq4=
 github.com/awalterschulze/gographviz v2.0.3+incompatible h1:9sVEXJBJLwGX7EQVhLm2elIKCm7P2YHFC8v6096G09E=
 github.com/awalterschulze/gographviz v2.0.3+incompatible/go.mod h1:GEV5wmg4YquNw7v1kkyoX9etIk8yVmXj+AkDHuuETHs=
