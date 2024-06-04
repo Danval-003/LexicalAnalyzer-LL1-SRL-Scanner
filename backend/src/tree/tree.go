@@ -1,4 +1,4 @@
-package tree
+package main
 
 import (
 	"fmt"
@@ -43,6 +43,7 @@ func NumberToLetter(num int) string {
 func makeTree(regex_ string) *Node  {
 	// Convert the infix to postfix
 	postfix := regex.InfixToPostfix(regex_)
+	fmt.Println(postfix)
 	// Create a stack to store the nodes
 	stack := []*Node{}
 
