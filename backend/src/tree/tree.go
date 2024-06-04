@@ -254,7 +254,7 @@ func MakeTreeFromMap(Tokens map[string]string) {
 			topTree.Nullable = topTree.Left.Nullable || topTree.Right.Nullable
 			topTree.First = append(topTree.Left.First, topTree.Right.First...)
 			topTree.Last = append(topTree.Left.Last, topTree.Right.Last...)
-			CalcFollow(topTree)
+			CalcFollow(topTree) 
 		}
 	}
 
