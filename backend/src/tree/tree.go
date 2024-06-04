@@ -236,7 +236,7 @@ func ToGraph(n *Node){
 }
 
 
-func MakeTreeFromMap(Tokens map[string]string) {
+func MakeTreeFromMap(Tokens map[string]string) *Node {
 	// Define counter
 	counter := 0
 	symbol := 0
@@ -258,5 +258,7 @@ func MakeTreeFromMap(Tokens map[string]string) {
 		}
 	}
 
+	// Return the top tree
+	return topTree
 }
 

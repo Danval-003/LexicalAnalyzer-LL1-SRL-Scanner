@@ -1,8 +1,7 @@
-package afd
+package main
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/tree"
 )
@@ -17,7 +16,16 @@ type State struct {
 
 func MakeAFD(Tokens map[string]string) {
 
+	treeA := tree.MakeTreeFromMap(Tokens)
 
+}
+
+
+func main() {
+	Tokens := map[string]string{}
+	Tokens["ID"] = "['a'-'z']['a'-'z']*"
+	Tokens["NUM"] = "['0'-'9']['0'-'9']*"
+	MakeAFD(Tokens)
 }
 
 
