@@ -1,8 +1,11 @@
-package tree
+package main
 
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"runtime"
+	"strconv"
 
 	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex"
 
@@ -19,11 +22,21 @@ type Node struct {
 	Value    interface{} `json:"Value"`
 	Left     *Node       `json:"Left"`
 	Right    *Node       `json:"Right"`
-	Ident    int         `json:"ident"` // Change the field name to be exported
+	Ident    string      `json:"ident"` // Change the field name to be exported
 	Nullable bool        `json:"Nullable"`
 
-	First  []int `json:"First"`
-	Follow []int `json:"Follow"`
+	First  []*Node `json:"First"`
+	Follow []*Node `json:"Follow"`
+}
+
+func NumberToLetter(num int) string {
+    if num <= 26 {
+        return string(rune('a' + num - 1))
+    } else {
+        first := string(rune('a' + (num-1)/26 - 1))
+        second := string(rune('a' + (num-1)%26))
+        return first + second
+    }
 }
 
 
@@ -34,12 +47,14 @@ func makeTree(regex_ string) *Node  {
 	stack := []*Node{}
 
 	counter := 0
+	symbol:= 0
 
 	// Iterate over the postfix
 	for i := 0; i < len(postfix); i++ {
 		if postfix[i] == "." {
+			symbol++
 			// Create a new node
-			node := &Node{Value: ".", Left: stack[len(stack)-2], Right: stack[len(stack)-1], Ident: 0}
+			node := &Node{Value: ".", Left: stack[len(stack)-2], Right: stack[len(stack)-1], Ident: NumberToLetter(symbol)}
 			// Set nullable
 			node.Nullable = stack[len(stack)-1].Nullable && stack[len(stack)-2].Nullable
 			// Calc First
@@ -53,8 +68,9 @@ func makeTree(regex_ string) *Node  {
 			// Append the node to the stack
 			stack = append(stack, node)
 		} else if postfix[i] == "|" {
+			symbol++
 			// Create a new node
-			node := &Node{Value: "|", Left: stack[len(stack)-2], Right: stack[len(stack)-1], Ident: 0}
+			node := &Node{Value: "|", Left: stack[len(stack)-2], Right: stack[len(stack)-1], Ident: NumberToLetter(symbol)}
 			// Calc First
 			node.First = append(stack[len(stack)-2].First, stack[len(stack)-1].First...)
 			// Pop the last two elements
@@ -63,8 +79,9 @@ func makeTree(regex_ string) *Node  {
 			// Append the node to the stack
 			stack = append(stack, node)
 		} else if postfix[i] == "*" {
+			symbol++
 			// Create a new node
-			node := &Node{Value: "*", Left: stack[len(stack)-1], Ident: 0}
+			node := &Node{Value: "*", Left: stack[len(stack)-1], Ident: NumberToLetter(symbol)}
 			// Calc First
 			node.First = stack[len(stack)-1].First
 			// Set nullable
@@ -76,14 +93,14 @@ func makeTree(regex_ string) *Node  {
 		} else {
 			counter++
 			// Create a new node
-			node := &Node{Value: postfix[i], Ident: counter}
+			node := &Node{Value: postfix[i], Ident: strconv.Itoa(counter)}
 			if postfix[i] == "epsilon" {
 				node.Nullable = true
 			} else {
 				node.Nullable = false
 			}
 			// Calc First
-			node.First = []int{counter}
+			node.First = append(node.First, node)
 
 			// Append the node to the stack
 			stack = append(stack, node)
@@ -92,6 +109,20 @@ func makeTree(regex_ string) *Node  {
 
 	// Return the last element
 	return stack[0]
+}
+
+func calcFollow(n *Node){
+	if n.Value == "." {
+
+	}
+
+
+	if n.Left != nil {
+		calcFollow(n.Left)
+	}
+	if n.Right != nil {
+		calcFollow(n.Right)
+	}
 }
 
 
@@ -106,23 +137,23 @@ func nodeToJson(n *Node) string {
 }
 
 func addNode(n *Node, graphAst *gographviz.Graph) {
-	// Create a new node
-	nodeName := fmt.Sprintf("N%d", n.Ident)
+	// Create a new node Ident is a string
+	nodeName := "N"+n.Ident
 	// Add the node to the graph
-	graphAst.AddNode("AST", nodeName, map[string]string{"label": fmt.Sprintf("%v", n.Value)})
+	graphAst.AddNode("AST", nodeName, map[string]string{"label": fmt.Sprintf("\"%v\"", n.Value)})
 	// Check if the left node is not nil
 	if n.Left != nil {
 		// Add the left node to the graph
 		addNode(n.Left, graphAst)
 		// Create a new edge
-		graphAst.AddEdge(nodeName, fmt.Sprintf("N%d", n.Left.Ident), true, nil)
+		graphAst.AddEdge(nodeName, "N"+n.Left.Ident, true, nil)
 	}
 	// Check if the right node is not nil
 	if n.Right != nil {
 		// Add the right node to the graph
 		addNode(n.Right, graphAst)
 		// Create a new edge
-		graphAst.AddEdge(nodeName, fmt.Sprintf("N%d", n.Right.Ident), true, nil)
+		graphAst.AddEdge(nodeName, "N"+n.Right.Ident, true, nil)
 	}
 
 }
@@ -142,12 +173,28 @@ func toGraph(n *Node){
 	f.WriteString(graphAst.String())
 	// Close the file
 	f.Close()
+
+	// Make a pdf to visualize the graph
+	cmd := "dot -Tpdf ast.dot -o ast.pdf"
+	var err error
+
+	switch runtime.GOOS {
+	case "windows":
+		err = exec.Command("cmd", "/C", cmd).Run()
+	default: // Assume Unix-like system
+		err = exec.Command("bash", "-c", cmd).Run()
+	}
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
 }
 
 func main(){
 
 	// Create a new tree
-	tree := makeTree("a.b|c*")
+	tree := makeTree("cb*c")
 	// Convert the tree to json
 	jsonTree := nodeToJson(tree)
 	// Print the json

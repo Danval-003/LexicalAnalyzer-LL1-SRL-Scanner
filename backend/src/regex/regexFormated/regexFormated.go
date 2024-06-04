@@ -1,6 +1,7 @@
 package regexFormated
 
 import (
+	"embed"
 	"fmt"
 )
 
@@ -211,6 +212,7 @@ func setDifference(set1 []rune, set2 []rune) []rune {
 	return result
 }
 
+
 func FormatRegex(regexTex string) []interface{} {
 	// Convert the string to a slice of chars
 	runes, balanced := balanceExp(regexTex)
@@ -222,7 +224,10 @@ func FormatRegex(regexTex string) []interface{} {
 	var result []interface{}
 
 	// Create a set of string to be used as operators
-	operators := []string{"|", "(","[", "*", "."}
+	operators := []string{"|", "(","[", "."}
+	var end_index int
+	var tempIndex [] int
+	tempIndex = append(tempIndex, 0)
 
 	// Iterate over the runes
 	for i := 0; i < len(runes); i++ {
@@ -232,6 +237,8 @@ func FormatRegex(regexTex string) []interface{} {
 				result = append(result, runes[i+1])
 				// Skip the next rune
 				i++
+				tempIndex[len(tempIndex)-1] = len(result)-1
+				end_index = len(result)
 			}
 		} else {
 			if runes[i] == '(' {
@@ -242,8 +249,10 @@ func FormatRegex(regexTex string) []interface{} {
 					}
 				}
 				result = append(result, "(")
+				tempIndex = append(tempIndex, len(result)-1)
 			} else if runes[i] == ')' {
 				result = append(result, ")")
+				end_index = len(result)
 			} else if runes[i] == '[' {
 				start:= i+1
 				end := 0
@@ -292,6 +301,7 @@ func FormatRegex(regexTex string) []interface{} {
 					}
 				}
 				result = append(result, "(")
+				tempIndex = append(tempIndex, len(result)-1)
 				// Iter over set to put values into result
 				for j := 0; j < len(set); j++ {
 					result = append(result, int32(set[j]))
@@ -301,44 +311,67 @@ func FormatRegex(regexTex string) []interface{} {
 				}
 
 				result = append(result, ")")
-
+				end_index = len(result)
 
 			} else{
 				if runes[i] == '|' {
+					// Obtain the last element and pop
+					last := result[tempIndex[len(tempIndex)-1]:end_index]
+					result = result[:tempIndex[len(tempIndex)-1]]
 					// Append the pipe to the result, to string
+					result = append(result, "(")
+					tempIndex[len(tempIndex)-1] = len(result)-1
+					result = append(result, last...)
+					result = append(result, ")")
 					result = append(result, "|")
 				} else if runes[i] == '*' {
-					// append the pipe to the result, to string
+					// Obtain the last element and pop
+					last := result[tempIndex[len(tempIndex)-1]:end_index]
+					result = result[:tempIndex[len(tempIndex)-1]]
+					// Append the pipe to the result, to string
+					result = append(result, "(")
+					tempIndex[len(tempIndex)-1] = len(result)-1
+					result = append(result, last...)
+					result = append(result, ")")
 					result = append(result, "*")
 				} else if runes[i] == '+' {
 					// Verify if the last rune is not a operator, (not in the set operators)
 					if len(result) > 0 {
-						if !Contains(operators, result[len(result)-1]) {
+						if !Contains([]string{"|", "(","[", ".", "*"}, result[len(result)-1]) {
 							// Obtain the last element and pop
-							last := result[len(result)-1]
-							result = result[:len(result)-1]
+							last := result[tempIndex[len(tempIndex)-1]:end_index]
+							result = result[:tempIndex[len(tempIndex)-1]]
 							
 							result = append(result, "(")
-							result = append(result, last)
-							result = append(result, ".")
-							result = append(result, last)
-							result = append(result, "*")
+							tempIndex[len(tempIndex)-1] = len(result)-1
+							result = append(result, "(")
+							result = append(result, last...)
 							result = append(result, ")")
+							result = append(result, ".")
+							result = append(result, "(")
+							result = append(result, last...)
+							result = append(result, ")")
+							result = append(result, ")")
+							end_index = len(result)
 						}
 					}
 				} else if runes[i] == '?' {
 					// Verify if the last rune is not a operator, (not in the set operators)
 					if len(result) > 0 {
-						if !Contains(operators, result[len(result)-1]) {
+						if !Contains([]string{"|", "(","[", ".", "*"}, result[len(result)-1]) {
 							// Obtain the last element and pop
-							last := result[len(result)-1]
-							result = result[:len(result)-1]
+							last := result[tempIndex[len(tempIndex)-1]:end_index]
+							result = result[:tempIndex[len(tempIndex)-1]]
 							
 							result = append(result, "(")
-							result = append(result, last)
+							tempIndex[len(tempIndex)-1] = len(result)-1
+							result = append(result, "(")
+							result = append(result, last...)
+							result = append(result, ")")
 							result = append(result, "|")
 							result = append(result, "epsilon")
 							result = append(result, ")")
+							end_index = len(result)
 						}
 					}
 				} else {
@@ -350,7 +383,20 @@ func FormatRegex(regexTex string) []interface{} {
 						}
 					}
 					result = append(result, int32(runes[i]))
+					if len(tempIndex) >0 {
+						if len(result)>1{
+							if result[len(result)-1] == "*" {
+								tempIndex[len(tempIndex)-1] = len(result)-2
+								end_index = len(result)
+								continue
+							}
+						}
+	
+						tempIndex[len(tempIndex)-1] = len(result)-1
+						end_index = len(result)
+					}
 				}
+
 			}
 		}
 	}
