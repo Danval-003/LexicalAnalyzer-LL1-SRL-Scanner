@@ -41,7 +41,7 @@ func NumberToLetter(num int) string {
 }
 
 
-func makeTree(regex_ string) *Node  {
+func MakeTree(regex_ string) *Node  {
 	// Convert the infix to postfix
 	postfix := regex.InfixToPostfix(regex_)
 	fmt.Println(postfix)
@@ -122,11 +122,14 @@ func makeTree(regex_ string) *Node  {
 		}
 	}
 
+	// Calc Follow
+	CalcFollow(stack[0])
+
 	// Return the last element
 	return stack[0]
 }
 
-func calcFollow(n *Node){
+func CalcFollow(n *Node){
 	if n.Value == "." {
 		for _, node := range n.Left.Last {
 			node.Follow = append(node.Follow, n.Right.First...)
@@ -138,10 +141,10 @@ func calcFollow(n *Node){
 	}
 
 	if n.Left != nil {
-		calcFollow(n.Left)
+		CalcFollow(n.Left)
 	}
 	if n.Right != nil {
-		calcFollow(n.Right)
+		CalcFollow(n.Right)
 	}
 }
 
@@ -150,14 +153,14 @@ func (n *Node) String() string {
 	return fmt.Sprintf("%v", n.Value)
 }
 
-func nodeToJson(n *Node) string {
+func CodeToJson(n *Node) string {
 	// Convert the node to json
 	jsonNode, _ := json.Marshal(n)
 	fmt.Println(string(jsonNode))
 	return string(jsonNode)
 }
 
-func addNode(n *Node, graphAst *gographviz.Graph) {
+func AddNode(n *Node, graphAst *gographviz.Graph) {
 	// Create a new node Ident is a string
 	nodeName := "N"+n.Ident
 	// Add the node to the graph
@@ -165,21 +168,21 @@ func addNode(n *Node, graphAst *gographviz.Graph) {
 	// Check if the left node is not nil
 	if n.Left != nil {
 		// Add the left node to the graph
-		addNode(n.Left, graphAst)
+		AddNode(n.Left, graphAst)
 		// Create a new edge
 		graphAst.AddEdge(nodeName, "N"+n.Left.Ident, true, nil)
 	}
 	// Check if the right node is not nil
 	if n.Right != nil {
 		// Add the right node to the graph
-		addNode(n.Right, graphAst)
+		AddNode(n.Right, graphAst)
 		// Create a new edge
 		graphAst.AddEdge(nodeName, "N"+n.Right.Ident, true, nil)
 	}
 
 }
 
-func toGraph(n *Node){
+func ToGraph(n *Node){
 	// Create a new graph
 	graphAst := gographviz.NewGraph()
 	// Set the name of the graph
@@ -187,7 +190,7 @@ func toGraph(n *Node){
 	// Set the type of the graph
 	graphAst.SetDir(true)
 	// Add the node to the graph
-	addNode(n, graphAst)
+	AddNode(n, graphAst)
 	// Create a new file
 	f, _ := os.Create("ast.dot")
 	// Write the graph to the file
