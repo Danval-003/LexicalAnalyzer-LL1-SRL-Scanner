@@ -46,7 +46,6 @@ func EvalAlphabet(alphabet *[]rune, toeval []interface{}) {
 	for _, v := range toeval {
 		switch val := v.(type) {
 			case int32:
-				fmt.Println(val)
 				// Check if the value is not in the alphabet
 				if !regexFormated.ContainsRune(*alphabet, val) {
 					// Append the value to the alphabet with try
