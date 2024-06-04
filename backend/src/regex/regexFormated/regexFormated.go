@@ -424,10 +424,3 @@ func FormatRegex(regexTex string) []interface{} {
 
 	return result
 }
-
-
-func main() {
-	// Llamar a la función FormatRegex desde el paquete regex
-	result := FormatRegex( "c(a+b)?*|d" )
-	fmt.Println(result)
-}
