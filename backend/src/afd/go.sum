@@ -6,6 +6,8 @@ github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex v0.0.0-2
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex v0.0.0-20240604072836-064ecf3cbf87/go.mod h1:q4AXuvW9I7MF6wncVGnBh1onTOYgZFzHh/PLTOkB6pk=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex v0.0.0-20240604165851-ebce278808ba h1:IuXAzxavRIOm0ArxR3hMjTb1Ke8GRUZVMYJs6GeG7yw=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex v0.0.0-20240604165851-ebce278808ba/go.mod h1:q4AXuvW9I7MF6wncVGnBh1onTOYgZFzHh/PLTOkB6pk=
+github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex v0.0.0-20240604172749-3789a23ea154 h1:4YDaeQ/zGNj0D1bj8ihnCIWXlb96ewL6htF6b8EsHuM=
+github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex v0.0.0-20240604172749-3789a23ea154/go.mod h1:q4AXuvW9I7MF6wncVGnBh1onTOYgZFzHh/PLTOkB6pk=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated v0.0.0-20240604055423-b6a43e28668d h1:3Yh47IOHvQM6BURnluYVXXx5C7GVdDaKfka5Lt/FbGg=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated v0.0.0-20240604055423-b6a43e28668d/go.mod h1:mKyg0JsUTqmMRoGuC07Sr7mnyDZqHDj/sz0pO/Qvfgo=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated v0.0.0-20240604062235-97d288764a3a h1:b8rfUDPAQMvFdrk/fKezKBzZfq3bKfO5hTUkEKi1MV0=
