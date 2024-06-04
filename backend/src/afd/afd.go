@@ -6,7 +6,7 @@ import (
 )
 
 func MakeAFD(regex string) {
-	tree := tree.MakeTree(regex)
+	tree := tree.MakeTree
 }
 
 
