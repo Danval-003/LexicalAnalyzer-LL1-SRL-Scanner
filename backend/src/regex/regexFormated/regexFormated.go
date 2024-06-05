@@ -25,8 +25,8 @@ func ContainsRune(s []rune, e rune) bool {
 }
 
 
-// balanceExp function checks if the parentheses and square brackets are balanced in the regex
-func balanceExp(regex string) ([]rune, bool) {
+// BalanceExp function checks if the parentheses and square brackets are balanced in the regex
+func BalanceExp(regex string) ([]rune, bool) {
 	// Initialize the boolean
 	balanced := true
 	// Convert the string to slice of runes
@@ -116,7 +116,7 @@ func balanceExp(regex string) ([]rune, bool) {
 				}
 				result = append(result, runes[i])
 			} else {
-				if Contains([]string{"|", "*", "+", "?"}, string(runes[i])) {
+				if Contains([]string{"|", "*", "+", "?", "_"}, string(runes[i])) {
 					result = append(result, runes[i])
 				} else if runes[i] == '\\' {
 					result = append(result, runes[i])
@@ -134,7 +134,8 @@ func balanceExp(regex string) ([]rune, bool) {
 						return result, balanced
 					}
 				} else {
-					result = append(result, runes[i])
+					balanced = false
+					return result, balanced
 				}
 			}
 		}
@@ -214,7 +215,7 @@ func setDifference(set1 []rune, set2 []rune) []rune {
 
 func FormatRegex(regexTex string) []interface{} {
 	// Convert the string to a slice of chars
-	runes, balanced := balanceExp(regexTex)
+	runes, balanced := BalanceExp(regexTex)
 	if !balanced {
 		fmt.Println("The expression is unbalanced")
 		return nil
@@ -334,7 +335,6 @@ func FormatRegex(regexTex string) []interface{} {
 					for j := tempIndex[len(tempIndex)-1]; j < end_index; j++ {
 						last = append(last, result[j])
 					}
-					fmt.Println(last)
 					result = result[:tempIndex[len(tempIndex)-1]]
 					// Append the pipe to the result, to string
 					result = append(result, "(")
@@ -352,17 +352,17 @@ func FormatRegex(regexTex string) []interface{} {
 							for j := tempIndex[len(tempIndex)-1]; j < end_index; j++ {
 								last = append(last, result[j])
 							}
-							fmt.Println(last)
+							
 							result = result[:tempIndex[len(tempIndex)-1]]
-							fmt.Println(last...)
+							
 							
 							result = append(result, "(")
-							fmt.Println(last...)
+							
 							tempIndex[len(tempIndex)-1] = len(result)-1
-							fmt.Println(last...)
+							
 							result = append(result, "(")
 							result = append(result, last...)
-							fmt.Println(last...)
+							
 							result = append(result, ")")
 							result = append(result, ".")
 							result = append(result, "(")
@@ -395,7 +395,26 @@ func FormatRegex(regexTex string) []interface{} {
 							end_index = len(result)
 						}
 					}
-				} else {
+				} else if runes[i] == '_' { 
+					// Verify if the last rune is not a operator, (not in the set operators)
+					if len(result) > 0 {
+						if !Contains(operators, result[len(result)-1]) {
+							// append the pipe to the result, to string
+							result = append(result, ".")
+						}
+					}
+
+					result = append(result, "(")
+					// Add All the runes from 0 to 255
+					for j := 0; j < 256; j++ {
+						result = append(result, int32(j))
+						if j+1 < 256 {
+							result = append(result, "|")
+						}
+					}
+					result = append(result, ")")
+				
+				}else {
 					// Verify if the last rune is not a operator, (not in the set operators)
 					if len(result) > 0 {
 						if !Contains(operators, result[len(result)-1]) {
