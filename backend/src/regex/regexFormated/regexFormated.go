@@ -227,7 +227,7 @@ func FormatRegex(regexTex string) []interface{} {
 	runes, balanced := BalanceExp(regexTex)
 	if !balanced {
 		fmt.Println("The expression is unbalanced")
-		return nil
+		return nil 
 	} 
 	// Create a slice to store the result
 	var result []interface{}
