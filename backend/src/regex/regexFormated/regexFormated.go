@@ -252,8 +252,14 @@ func FormatRegex(regexTex string) []interface{} {
 		} else {
 			if runes[i] == '(' {
 				if len(result) > 0 {
-					if !Contains(operators, result[len(result)-1]) {
-						// append the pipe to the result, to string
+					// Verify if type from last element in result is String
+					last := result[len(result)-1]
+					if _, ok := last.(string); ok {
+						if !Contains(operators, result[len(result)-1]) {
+							// append the pipe to the result, to string
+							result = append(result, ".")
+						}
+					} else {
 						result = append(result, ".")
 					}
 				}
@@ -306,8 +312,14 @@ func FormatRegex(regexTex string) []interface{} {
 				}
 
 				if len(result) > 0 {
-					if !Contains(operators, result[len(result)-1]) {
-						// append the pipe to the result, to string
+					// Verify if type from last element in result is String
+					last := result[len(result)-1]
+					if _, ok := last.(string); ok {
+						if !Contains(operators, result[len(result)-1]) {
+							// append the pipe to the result, to string
+							result = append(result, ".")
+						}
+					} else {
 						result = append(result, ".")
 					}
 				}
@@ -407,8 +419,14 @@ func FormatRegex(regexTex string) []interface{} {
 				} else if runes[i] == '_' { 
 					// Verify if the last rune is not a operator, (not in the set operators)
 					if len(result) > 0 {
-						if !Contains(operators, result[len(result)-1]) {
-							// append the pipe to the result, to string
+						// Verify if type from last element in result is String
+						last := result[len(result)-1]
+						if _, ok := last.(string); ok {
+							if !Contains(operators, result[len(result)-1]) {
+								// append the pipe to the result, to string
+								result = append(result, ".")
+							}
+						} else {
 							result = append(result, ".")
 						}
 					}
@@ -424,10 +442,16 @@ func FormatRegex(regexTex string) []interface{} {
 					result = append(result, ")")
 				
 				}else {
-					// Verify if the last rune is not a operator, (not in the set operators)
+					
 					if len(result) > 0 {
-						if !Contains(operators, result[len(result)-1]) {
-							// append the pipe to the result, to string
+						// Verify if type from last element in result is String
+						last := result[len(result)-1]
+						if _, ok := last.(string); ok {
+							if !Contains(operators, result[len(result)-1]) {
+								// append the pipe to the result, to string
+								result = append(result, ".")
+							}
+						} else {
 							result = append(result, ".")
 						}
 					}
