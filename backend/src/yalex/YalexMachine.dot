@@ -1,6 +1,6 @@
 digraph G {
 	rankdir=LR;
-	Q0->Q1[ label=( ];
+	Q0->Q1[ label=A ];
 	Q0 [ shape=doublecircle ];
 	Q1 [ shape=doublecircle ];
 

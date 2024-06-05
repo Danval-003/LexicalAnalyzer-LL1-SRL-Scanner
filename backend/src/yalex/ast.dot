@@ -1,8 +1,8 @@
 digraph AST {
-	NT514->N1;
-	NT514->NTK514;
-	N1 [ label="40" ];
-	NT514 [ label="." ];
-	NTK514 [ label="COMMET" ];
+	NT1->N1;
+	NT1->NTK1;
+	N1 [ label="65" ];
+	NT1 [ label="." ];
+	NTK1 [ label="COMMET" ];
 
 }

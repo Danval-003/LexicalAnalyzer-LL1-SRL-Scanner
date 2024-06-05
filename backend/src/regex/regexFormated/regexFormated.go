@@ -40,13 +40,8 @@ func BalanceExp(regex string) ([]rune, bool) {
 	for i := 0; i < len(runes); i++ {
 		if runes[i] == '\\' {
 			if i+1 < len(runes) {
-				if Contains([]string{"|", "*", "+", "?", "_"}, string(runes[i+1])) {
-					result = append(result, runes[i+1])
-					i++
-				} else {
-					balanced = false
-					return result, balanced
-				}
+				result = append(result, runes[i+1])
+				i++
 			}
 			continue
 		}
