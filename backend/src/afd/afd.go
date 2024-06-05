@@ -28,6 +28,17 @@ type State struct {
 	TokenPrecedence int             
 }
 
+type Transition struct {
+	Symbol string     `json:"Symbol"`
+	NextState string  `json:"NextState"`
+}
+
+// Struct to represent a AFD in JSON
+type AFDJSON struct {
+	States []State `json:"States"`
+	Transitions map[string][]Transition `json:"Transitions"`
+}
+
 // Struct to represent a State with a list of Nodes
 type StateNodes struct {
 	State *State
@@ -71,7 +82,6 @@ func NodesToHash(nodes []*tree.Node) string {
 // Search in the list a Node with like "TK"+(Number) in this Ident returns true if it exists
 func SearchToken(nodes []*tree.Node) bool {
 	for _, node := range nodes {
-		fmt.Println(node.Ident)
 		if len(node.Ident) < 2 {
 			continue
 		}
@@ -256,7 +266,6 @@ func MakeAFD(Tokens map[string]string) (*State, []rune, []*State){
 			var nextState *State
 			// Verify if the statekey is in the states
 			if _, ok := states[newStateKey]; !ok {
-				fmt.Println("New State: ")
 				nextState = &State{Name: "Q"+strconv.Itoa(count) , Transitions: map[rune]*State{}, Accept: SearchToken(newStateNodes)}
 				states[newStateKey] = &StateNodes{State: nextState, Nodes: newStateNodes}
 				statesList = append(statesList, nextState)
@@ -285,19 +294,55 @@ func MakeAFD(Tokens map[string]string) (*State, []rune, []*State){
 	return states[intialKey].State, alphabet, statesList
 }
 
-// Function to Decode the AFD from JSON
-func EncodeAFD(state *State) string {
+// Func to Encode the State to JSON
+type StateSlice []*State
+
+func (states StateSlice) Encode() string {
+	AFDJSON := &AFDJSON{States: []State{}, Transitions: map[string][]Transition{}}
+	// Iterate over the states
+	for _, state := range states {
+		AFDJSON.States = append(AFDJSON.States, *state)
+		// Iterate over the transitions
+		for symbol, nextState := range state.Transitions {
+			if AFDJSON.Transitions[state.Name] == nil {
+				AFDJSON.Transitions[state.Name] = []Transition{}
+			}
+			AFDJSON.Transitions[state.Name] = append(AFDJSON.Transitions[state.Name], Transition{Symbol: string(symbol), NextState: nextState.Name})
+		}
+	}
+
 	// Encode the AFD to JSON
-	jsonState, _ := json.Marshal(state)
-	return string(jsonState)
+	AFDJSONBytes, _ := json.Marshal(AFDJSON)
+	return string(AFDJSONBytes)
 }
 
 // Function to Decode the AFD from JSON
 func DecodeAFD(jsonState string) *State {
-	// Decode the AFD from JSON
-	state := &State{}
-	json.Unmarshal([]byte(jsonState), state)
-	return state
+
+	AFDJSON := &AFDJSON{}
+	json.Unmarshal([]byte(jsonState), AFDJSON)
+
+	// Create a map to store the states
+	states := map[string]*State{}
+
+	// Iterate over the states
+	for _, state := range AFDJSON.States {
+		states[state.Name] = &state
+	}
+
+	// Iterate over the transitions
+	for state_From, transition := range AFDJSON.Transitions {
+		// Iterate over the transitions
+		for _, transition := range transition {
+			if states[state_From].Transitions == nil {
+				states[state_From].Transitions = map[rune]*State{}
+			}
+
+			states[state_From].Transitions[rune(transition.Symbol[0])] = states[transition.NextState]
+		}
+	}
+
+	return states["Q0"]
 }
 
 // Struct to represent a Simulated part
@@ -363,21 +408,18 @@ func SimulateAFD(state *State, stringToSimulate string) []*SimulatedPart {
 	simulates := []*SimulatedPart{}
 	// Iterate over the string
 	for index < len(runes) {
-		var simulate *SimulatedPart
-		simulate = &SimulatedPart{}
+		simulate := &SimulatedPart{}
 		wg.Add(1)
 		go SimulateAFDPart(actualState, runes, index, &wg, simulate)
 		simulates = append(simulates, simulate)
 		index++
 	}
 	wg.Wait()
-	fmt.Println("Simulated: ", stringToSimulate)
 	simulatedParts := []*SimulatedPart{}
 	// Iterate over the simulates
 	simu := -1
 	for _, simulate := range simulates {
 		if simulate.Init > simu {
-			fmt.Println("Token: ", simulate.Token, "Runes: ", string(simulate.Runes), "Accepted: ", simulate.Accepted)
 			simu= simulate.Final
 			simulatedParts = append(simulatedParts, simulate)
 		}
