@@ -38,6 +38,20 @@ func BalanceExp(regex string) ([]rune, bool) {
 	inInSquareBracket := 0
 	// Iterate over the runes
 	for i := 0; i < len(runes); i++ {
+		if runes[i] == '\\' {
+			if i+1 < len(runes) {
+				if Contains([]string{"|", "*", "+", "?", "_"}, string(runes[i+1])) {
+					result = append(result, runes[i+1])
+					i++
+				} else {
+					balanced = false
+					return result, balanced
+				}
+			}
+			continue
+		}
+
+
 		if runes[i] == '(' {
 			result = append(result, runes[i])
 			isInBracket++

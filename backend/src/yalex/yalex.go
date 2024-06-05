@@ -8,8 +8,17 @@ import (
 
 func main() {
 	YalexTokens := map[string]string{
-		"COMMET": "\\{\\*",
-	
+		"COMMET": "\\(\\*[^'}']+\\*\\)",
 	}
+	YalexMachine,_, _ := afd.MakeAFD(YalexTokens)
+	afd.VisualizeAFD(YalexMachine, "YalexMachine", "YalexMachine")
+	simulate:= afd.SimulateAFD(YalexMachine, "(*Hola Mundo*)")
+
+	// Iterate over the result
+	for _, token := range simulate {
+		fmt.Println("Token: ", token.Token, "Value: ", token.Accepted)
+	}
+
+
 }
 
