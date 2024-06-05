@@ -1,9 +1,5 @@
-github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex v0.0.0-20240604053146-9bbf376141b8 h1:0yU8iWcJYUrGFRONzNOSFcKZjLpwfPdUHbNHpfKRs/8=
-github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex v0.0.0-20240604053146-9bbf376141b8/go.mod h1:q4AXuvW9I7MF6wncVGnBh1onTOYgZFzHh/PLTOkB6pk=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex v0.0.0-20240605041251-05e82649caec h1:/Vq59yq+KK2qmh8grn2TFBX5kv1FvaUYg4kfAytzBso=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex v0.0.0-20240605041251-05e82649caec/go.mod h1:3s2b60E8qCumKZA83pffWYinPdgaAnPljaE7G4IG8EM=
-github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated v0.0.0-20240604053146-9bbf376141b8 h1:2K1CiJxrlHWBL1FFrJxidWnjjHkajtFFYt4cO0L9h8I=
-github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated v0.0.0-20240604053146-9bbf376141b8/go.mod h1:mKyg0JsUTqmMRoGuC07Sr7mnyDZqHDj/sz0pO/Qvfgo=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated v0.0.0-20240605041251-05e82649caec h1:FLzMBOIX2G7qnd96w+ShPjKmZkqsK+nIILbx3UD8b7w=
 github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated v0.0.0-20240605041251-05e82649caec/go.mod h1:mKyg0JsUTqmMRoGuC07Sr7mnyDZqHDj/sz0pO/Qvfgo=
 github.com/awalterschulze/gographviz v2.0.3+incompatible h1:9sVEXJBJLwGX7EQVhLm2elIKCm7P2YHFC8v6096G09E=

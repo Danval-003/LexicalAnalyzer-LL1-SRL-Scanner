@@ -8,7 +8,7 @@ import (
 
 func main() {
 	YalexTokens := map[string]string{
-		"COMMET": "\\(",
+		"COMMET": "'\n'",
 	}
 	YalexMachine,_, _ := afd.MakeAFD(YalexTokens)
 	afd.VisualizeAFD(YalexMachine, "YalexMachine", "YalexMachine")

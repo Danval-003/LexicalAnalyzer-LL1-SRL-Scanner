@@ -151,7 +151,13 @@ func AddState(state *State, VisitedStates map[string]*State, Graph *gographviz.G
 			AddState(nextState, VisitedStates, Graph)
 		}
 		// Add the transition
-		Graph.AddEdge(state.Name, nextState.Name, true, map[string]string{"label": string(symbol)})
+		symbolString:= ""
+		if symbol == '"'{
+			symbolString = "\"\\\"\""
+		} else {
+			symbolString = "\""+string(symbol)+"\""
+		}
+		Graph.AddEdge(state.Name, nextState.Name, true, map[string]string{"label": symbolString})
 	}
 
 }
