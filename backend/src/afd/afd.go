@@ -2,13 +2,14 @@ package afd
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"runtime"
 	"sort"
 	"strconv"
 
-	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/tree"
+	"backend/src/tree"
 
 	// Import to visualize the AFD with graphviz
 	"github.com/awalterschulze/gographviz"
@@ -94,31 +95,64 @@ func SearchToken(nodes []*tree.Node) bool {
 
 // Obtain a best token in the list of Nodes
 func BestToken(nodes []*tree.Node) (string, int) {
-	bestToken := ""
-	bestPrecedence := -1
-	for _, node := range nodes {
-		if len(node.Ident) < 2 {
-			continue
+	type result struct {
+		token      string
+		precedence int
+	}
+
+	numWorkers := 4 // Número de goroutines
+	nodeCount := len(nodes)
+	chunkSize := (nodeCount + numWorkers - 1) / numWorkers
+
+	results := make(chan result, numWorkers)
+	var wg sync.WaitGroup
+
+	for i := 0; i < numWorkers; i++ {
+		start := i * chunkSize
+		end := start + chunkSize
+		if end > nodeCount {
+			end = nodeCount
 		}
-		if node.Ident[:2] == "TK" {
-			if bestPrecedence == -1 {
-				bestToken = node.Value.(string)
-				value, err := strconv.Atoi(node.Ident[2:])
-				if err == nil {
-					bestPrecedence = value
+		if start >= end {
+			start = end
+		}
+		wg.Add(1)
+		go func(nodes []*tree.Node) {
+			defer wg.Done()
+			localBestToken := ""
+			localBestPrecedence := -1
+			for _, node := range nodes {
+				if len(node.Ident) < 2 {
+					continue
 				}
-			} else {
-				value, err := strconv.Atoi(node.Ident[2:])
-				if err == nil {
-					if value < bestPrecedence {
-						bestToken = node.Value.(string)
-						bestPrecedence = value
+				if node.Ident[:2] == "TK" {
+					value, err := strconv.Atoi(node.Ident[2:])
+					if err == nil {
+						if localBestPrecedence == -1 || value < localBestPrecedence {
+							localBestToken = node.Value.(string)
+							localBestPrecedence = value
+						}
 					}
 				}
 			}
+			results <- result{localBestToken, localBestPrecedence}
+		}(nodes[start:end])
+	}
+
+	wg.Wait()
+	close(results)
+
+	globalBestToken := ""
+	globalBestPrecedence := -1
+
+	for res := range results {
+		if res.precedence != -1 && (globalBestPrecedence == -1 || res.precedence < globalBestPrecedence) {
+			globalBestToken = res.token
+			globalBestPrecedence = res.precedence
 		}
 	}
-	return bestToken, bestPrecedence
+
+	return globalBestToken, globalBestPrecedence
 }
 
 // List to verify if a Node is in the list
@@ -129,6 +163,13 @@ func InList(node *tree.Node, list []*tree.Node) bool {
 		}
 	}
 	return false
+}
+
+
+// Yal function verify if a Machine exist
+func MachineExists(filename string) bool {
+	_, err := os.Stat(filename)
+	return !os.IsNotExist(err)
 }
 
 
@@ -155,7 +196,16 @@ func AddState(state *State, VisitedStates map[string]*State, Graph *gographviz.G
 		if symbol == '"'{
 			symbolString = "\"\\\"\""
 		} else {
-			symbolString = "\""+string(symbol)+"\""
+			// Verify if the symbol is supported for graphviz
+			if symbol == '\\'{
+				symbolString = "\"\\\\\""
+			} else {
+				if symbol < 32 || symbol == 127 {
+					symbolString = "\"\\x"+strconv.FormatInt(int64(symbol), 16)+"\""
+				} else {
+					symbolString = "\""+string(symbol)+"\""
+				}
+			}
 		}
 		Graph.AddEdge(state.Name, nextState.Name, true, map[string]string{"label": symbolString})
 	}
@@ -216,12 +266,8 @@ func MakeAFD(Tokens map[string]string) (*State, []rune, []*State){
 	for i, key := range keys {
 		precedence[key] = i
 	}
-
+	// Take time
 	treeA, alphabet := tree.MakeTreeFromMap(Tokens)
-	treeA.First = append(treeA.Left.First, treeA.Right.First...)
-	treeA.Last = append(treeA.Left.Last, treeA.Right.Last...)
-	tree.CalcFollow(treeA)
-	tree.ToGraph(treeA)
 	// Create a Map to store the States
 	states := map[string]*StateNodes{}
 
@@ -351,14 +397,69 @@ func DecodeAFD(jsonState string) *State {
 	return states["Q0"]
 }
 
+
+// Function to Save the AFD to a file
+func SaveMachine(filename string, jsonState StateSlice) {
+	// Open the file
+	file, _ := os.Create(filename)
+	// Write the json to the file
+	file.WriteString(jsonState.Encode())
+	file.Close()
+}
+
+// Function to Load the AFD from a file
+func LoadMachine(filename string) *State {
+	// Open the file
+	file, _ := os.Open(filename)
+	// Read the content of the file
+	content, _ := io.ReadAll(file)
+	// Decode the AFD
+	return DecodeAFD(string(content))
+}
+
 // Struct to represent a Simulated part
 type SimulatedPart struct {
-	Init int		`json:"init"`
+	Init int
 	Runes []rune	`json:"runes"`
-	Final int    	`json:"final"`
+	Final int    	
 	Token string	`json:"token"`
 	Accepted bool   `json:"accepted"`
 }
+
+type SimulatedPartJSON struct {
+	Text string     `json:"text"`
+	Accepted bool   `json:"accepted"`
+	Token string    `json:"token"`
+}
+
+// Alias to a list SimulatedPart
+type SimulatedParts []*SimulatedPart
+
+// Parts in the simulation
+type SimulationJSON struct {
+	Parts []SimulatedPartJSON `json:"parts"`
+	Accept bool              `json:"accept"`
+}
+
+// Function to convert SimulatedParts into a JSON
+func (simulatedParts SimulatedParts) Encode() (string, error) {
+	simulatedPartsJSON := []SimulatedPartJSON{}
+	accep := true
+	// Iterate over the SimulatedParts
+	for _, simulatedPart := range simulatedParts {
+		simulatedPartJSON := SimulatedPartJSON{Text: string(simulatedPart.Runes), Accepted: simulatedPart.Accepted, Token: simulatedPart.Token}
+		simulatedPartsJSON = append(simulatedPartsJSON, simulatedPartJSON)
+		accep = accep && simulatedPart.Accepted
+	}
+
+	simulation := SimulationJSON{Parts: simulatedPartsJSON, Accept: accep}
+
+	// Encode the SimulatedParts to JSON
+	simulatedPartsBytes, err := json.Marshal(simulation)
+
+	return string(simulatedPartsBytes), err
+}
+
 
 // Function to simulate a part of string in the AFD
 func SimulateAFDPart(state *State, runes []rune, init int, wg *sync.WaitGroup, simulate *SimulatedPart) {
@@ -366,12 +467,10 @@ func SimulateAFDPart(state *State, runes []rune, init int, wg *sync.WaitGroup, s
 	actualState := state
 	// token to store the token
 	token := ""
-	// boolean to store if the token is accepted
-	accepted := false
 
 	simulate.Init = init
 	simulate.Runes = runes[init: init+1]
-	simulate.Final = init + 1
+	simulate.Final = init 
 	// Runes simulated
 	for i := init; i < len(runes); i++ {
 		// Check if the rune is in the transitions
@@ -383,17 +482,10 @@ func SimulateAFDPart(state *State, runes []rune, init int, wg *sync.WaitGroup, s
 				simulate.Token = token
 				simulate.Accepted = true
 				simulate.Runes = runes[init:i+1]
-				accepted = true
 			}
 		} else {
 			break
 		}
-	}
-
-	if accepted {
-		fmt.Println("Token: ", token)
-	} else {
-		fmt.Println("Error")
 	}
 
 	wg.Done()
@@ -402,7 +494,7 @@ func SimulateAFDPart(state *State, runes []rune, init int, wg *sync.WaitGroup, s
 
 
 // Function to simulate the AFD with a string
-func SimulateAFD(state *State, stringToSimulate string) []*SimulatedPart {
+func SimulateAFD(state *State, stringToSimulate string) SimulatedParts {
 	// Change the string to a list of runes
 	runes := []rune(stringToSimulate)
 	// Stackto store the saved states
@@ -421,7 +513,7 @@ func SimulateAFD(state *State, stringToSimulate string) []*SimulatedPart {
 		index++
 	}
 	wg.Wait()
-	simulatedParts := []*SimulatedPart{}
+	simulatedParts := SimulatedParts{}
 	// Iterate over the simulates
 	simu := -1
 	for _, simulate := range simulates {

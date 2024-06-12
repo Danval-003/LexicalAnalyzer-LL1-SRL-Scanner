@@ -1,8 +1,0 @@
-digraph AST {
-	NT1->N1;
-	NT1->NTK1;
-	N1 [ label="(" ];
-	NT1 [ label="." ];
-	NTK1 [ label="COMMET" ];
-
-}

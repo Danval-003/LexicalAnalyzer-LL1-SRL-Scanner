@@ -40,6 +40,7 @@ func BalanceExp(regex string) ([]rune, bool) {
 	for i := 0; i < len(runes); i++ {
 		if runes[i] == '\\' {
 			if i+1 < len(runes) {
+				result = append(result, runes[i])
 				result = append(result, runes[i+1])
 				i++
 			}
@@ -93,7 +94,12 @@ func BalanceExp(regex string) ([]rune, bool) {
 						return result, balanced
 					}
 				} else {
-					result = append(result, nextRune)
+					if Contains([]string{"|", "*", "+", "?", "_", "(", ")", "[", "]"}, string(nextRune)) {
+						result = append(result, '\\')
+						result = append(result, nextRune)
+					} else {
+						result = append(result, nextRune)
+					}
 					i += 2
 				}
 			}
@@ -114,7 +120,12 @@ func BalanceExp(regex string) ([]rune, bool) {
 					i = j
 					break
 				} else {
-					result = append(result, runes[j])
+					if Contains([]string{"|", "*", "+", "?", "_", "(", ")", "[", "]"}, string(runes[j])) {
+						result = append(result, '\\')
+						result = append(result, runes[j])
+					} else {
+						result = append(result, runes[j])
+					}
 				}
 			}
 		} else {
@@ -241,6 +252,18 @@ func FormatRegex(regexTex string) []interface{} {
 	// Iterate over the runes
 	for i := 0; i < len(runes); i++ {
 		if runes[i] == '\\' {
+			if len(result) > 0 {
+				// Verify if type from last element in result is String
+				last := result[len(result)-1]
+				if _, ok := last.(string); ok {
+					if !Contains(operators, result[len(result)-1]) {
+						// append the pipe to the result, to string
+						result = append(result, ".")
+					}
+				} else {
+					result = append(result, ".")
+				}
+			}
 			// Verify if there is a next rune
 			if i+1 < len(runes) {
 				result = append(result, runes[i+1])
@@ -249,6 +272,7 @@ func FormatRegex(regexTex string) []interface{} {
 				tempIndex[len(tempIndex)-1] = len(result)-1
 				end_index = len(result)
 			}
+			continue
 		} else {
 			if runes[i] == '(' {
 				if len(result) > 0 {

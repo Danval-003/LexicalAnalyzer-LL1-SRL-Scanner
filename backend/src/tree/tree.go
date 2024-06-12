@@ -7,11 +7,13 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex"
-	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated"
+	"backend/src/regex"
+	"backend/src/regex/regexFormated"
 
 	// Import json
 	"encoding/json"
+
+	"sync"
 
 	// Use graphivz to visualize the tree
 	"github.com/awalterschulze/gographviz"
@@ -57,22 +59,29 @@ func EvalAlphabet(alphabet *[]rune, toeval []interface{}) {
 	}
 }
 
+// Struct to represent a tree
+type Tree struct {
+	Root *Node
+	Counter int
+}
 
-func MakeTree(regex_ string, token string, counter int, symbol int, alphabet *[]rune) (*Node, int, int)  {
+
+func MakeTree(tree *Tree, regex_ string, token string, alphabet *[]rune, wg *sync.WaitGroup) {
+	// Define counter
+	counter := tree.Counter
 	// Convert the infix to postfix
 	postfix := regex.InfixToPostfix(regex_)
 	// Eval the alphabet
 	EvalAlphabet(alphabet, postfix)
-	fmt.Println(postfix)
 	// Create a stack to store the nodes
 	stack := []*Node{}
 
 	// Iterate over the postfix
 	for i := 0; i < len(postfix); i++ {
 		if postfix[i] == "." {
-			symbol++
+			counter++
 			// Create a new node
-			node := &Node{Value: ".", Left: stack[len(stack)-2], Right: stack[len(stack)-1], Ident: NumberToLetter(symbol)}
+			node := &Node{Value: ".", Left: stack[len(stack)-2], Right: stack[len(stack)-1], Ident: NumberToLetter(counter)}
 			// Set nullable
 			node.Nullable = stack[len(stack)-1].Nullable && stack[len(stack)-2].Nullable
 			// Calc First
@@ -93,9 +102,9 @@ func MakeTree(regex_ string, token string, counter int, symbol int, alphabet *[]
 			// Append the node to the stack
 			stack = append(stack, node)
 		} else if postfix[i] == "|" {
-			symbol++
+			counter++
 			// Create a new node
-			node := &Node{Value: "|", Left: stack[len(stack)-2], Right: stack[len(stack)-1], Ident: NumberToLetter(symbol)}
+			node := &Node{Value: "|", Left: stack[len(stack)-2], Right: stack[len(stack)-1], Ident: NumberToLetter(counter)}
 			// Calc First
 			node.First = append(stack[len(stack)-2].First, stack[len(stack)-1].First...)
 			// Calc Last
@@ -106,9 +115,9 @@ func MakeTree(regex_ string, token string, counter int, symbol int, alphabet *[]
 			// Append the node to the stack
 			stack = append(stack, node)
 		} else if postfix[i] == "*" {
-			symbol++
+			counter++
 			// Create a new node
-			node := &Node{Value: "*", Left: stack[len(stack)-1], Ident: NumberToLetter(symbol)}
+			node := &Node{Value: "*", Left: stack[len(stack)-1], Ident: NumberToLetter(counter)}
 			// Calc First
 			node.First = stack[len(stack)-1].First
 			// Calc Last
@@ -163,8 +172,12 @@ func MakeTree(regex_ string, token string, counter int, symbol int, alphabet *[]
 	// Calc Follow
 	CalcFollow(node)
 
-	// Return the last element
-	return node, counter, symbol
+	// Return the node
+	tree.Root = node
+
+	// Wait for the group
+	wg.Done()
+
 }
 
 func CalcFollow(n *Node){
@@ -258,21 +271,29 @@ func ToGraph(n *Node){
 func MakeTreeFromMap(Tokens map[string]string) (*Node, []rune) {
 	// Define counter
 	counter := 0
-	symbol := 0
 	// Create a Alphabet rune
 	var alphabet []rune
+	nodes := []*Node{}
 
 	var topTree *Node
+	var wg sync.WaitGroup
 	// Iterate over the Tokens
 	for key, value := range Tokens {
-		// Create a tree
-		var topTree2 *Node
-		topTree2, counter, symbol = MakeTree(value, key, counter, symbol, &alphabet)
-		fmt.Println(counter)
+		wg.Add(1)
+		tr := &Tree{Counter: counter}
+		MakeTree(tr, value, key, &alphabet, &wg)
+		// Sum the counter number of values
+		counter += len(value)
+		nodes = append(nodes, tr.Root)
+	}
+
+	wg.Wait()
+
+	for _, node := range nodes {
 		if topTree == nil {
-			topTree = topTree2
+			topTree = node
 		} else {
-			topTree = &Node{Value: "|", Left: topTree, Right: topTree2, Ident: "O"+strconv.Itoa(counter)}
+			topTree = &Node{Value: "|", Left: topTree, Right: node, Ident: "O"+strconv.Itoa(counter)}
 			topTree.Nullable = topTree.Left.Nullable || topTree.Right.Nullable
 			topTree.First = append(topTree.Left.First, topTree.Right.First...)
 			topTree.Last = append(topTree.Left.Last, topTree.Right.Last...)

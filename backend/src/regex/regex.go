@@ -8,15 +8,13 @@ This code is a package that contains a function to format a regex string into a 
 */
 
 import (
-	"fmt"
-	"github.com/Danval-003/LexicalAnalyzer-LL1-SRL-Scanner/backend/src/regex/regexFormated"
+	"backend/src/regex/regexFormated"
 )
 
 
 // Function to pass infix a postfix
 func InfixToPostfix(regex string) []interface{} {
 	infix := regexFormated.FormatRegex(regex)
-	fmt.Println(infix)
 	// Create a slice to store the result
 	result := []interface{}{}
 	// Create a stack to store the operators
