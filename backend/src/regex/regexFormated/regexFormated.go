@@ -213,6 +213,8 @@ func makeSet(start int, end int, runes []rune) []rune {
 		}
 		result = setDifference(alphabet, result)
 	}
+
+	
 	return result
 }
 
@@ -380,6 +382,7 @@ func FormatRegex(regexTex string) []interface{} {
 					for j := tempIndex[len(tempIndex)-1]; j < end_index; j++ {
 						last = append(last, result[j])
 					}
+					result = append(result, "(")
 					result = result[:tempIndex[len(tempIndex)-1]]
 					// Append the pipe to the result, to string
 					result = append(result, "(")
@@ -387,6 +390,7 @@ func FormatRegex(regexTex string) []interface{} {
 					result = append(result, last...)
 					result = append(result, ")")
 					result = append(result, "*")
+					result = append(result, ")")
 					end_index = len(result)
 				} else if runes[i] == '+' {
 					// Verify if the last rune is not a operator, (not in the set operators)
@@ -399,21 +403,36 @@ func FormatRegex(regexTex string) []interface{} {
 							}
 							
 							result = result[:tempIndex[len(tempIndex)-1]]
+
+							text:=""
+							for j:=0; j<len(last); j++ {
+								if _, ok := last[j].(int32); ok {
+									text += string(rune(last[j].(int32)))
+								} else {
+									text += last[j].(string)
+								}
+							}
+							
 							
 							
 							result = append(result, "(")
+							
 							
 							tempIndex[len(tempIndex)-1] = len(result)-1
-							
 							result = append(result, "(")
+
 							result = append(result, last...)
-							
+
 							result = append(result, ")")
+							
+
 							result = append(result, ".")
+							result = append(result, "(")
 							result = append(result, "(")
 							result = append(result, last...)
 							result = append(result, ")")
 							result = append(result, "*")
+							result = append(result, ")")
 							result = append(result, ")")
 							end_index = len(result)
 						}
@@ -497,6 +516,7 @@ func FormatRegex(regexTex string) []interface{} {
 			}
 		}
 	}
+
 
 	return result
 }

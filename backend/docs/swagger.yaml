@@ -1,0 +1,523 @@
+definitions:
+  afd.ResponseSim:
+    properties:
+      accepted:
+        type: boolean
+      simulatedParts:
+        items:
+          $ref: '#/definitions/afd.SimulatedPart'
+        type: array
+      stringSummary:
+        type: string
+    type: object
+  afd.SimulatedPart:
+    properties:
+      accepted:
+        type: boolean
+      final:
+        type: integer
+      init:
+        type: integer
+      runes:
+        items:
+          type: integer
+        type: array
+      token:
+        type: string
+    type: object
+  compare.BadRequestResponse:
+    properties:
+      message:
+        type: string
+      status:
+        example: 400
+        type: integer
+    type: object
+  compare.SimResponse:
+    properties:
+      message:
+        type: string
+      scannerResult:
+        type: string
+      sim:
+        $ref: '#/definitions/yapar.SimResponse'
+      status:
+        example: 200
+        type: integer
+    type: object
+  compare.Simulate:
+    properties:
+      contentSimulate:
+        type: string
+      scannerName:
+        type: string
+      slrName:
+        type: string
+    type: object
+  login.BadResponse:
+    properties:
+      message:
+        example: Error
+        type: string
+      status:
+        example: 400
+        type: integer
+    type: object
+  login.GoodResponse:
+    properties:
+      data:
+        additionalProperties: true
+        type: object
+      message:
+        example: Success
+        type: string
+      status:
+        example: 200
+        type: integer
+    type: object
+  login.User:
+    properties:
+      password:
+        example: "1234"
+        type: string
+      username:
+        example: daniel
+        type: string
+    type: object
+  scanners.BadRequestResponse:
+    properties:
+      message:
+        type: string
+      status:
+        example: 400
+        type: integer
+    type: object
+  scanners.ScannerRequest:
+    properties:
+      content:
+        type: string
+      scannerName:
+        type: string
+    type: object
+  scanners.ScannerResponse:
+    properties:
+      message:
+        example: Scanner created successfully
+        type: string
+      names:
+        items:
+          type: string
+        type: array
+      status:
+        example: 200
+        type: integer
+    type: object
+  scanners.SimScan:
+    properties:
+      message:
+        type: string
+      name:
+        type: string
+      simPart:
+        $ref: '#/definitions/afd.ResponseSim'
+      status:
+        example: 200
+        type: integer
+    type: object
+  scanners.YalexPublic:
+    properties:
+      content:
+        type: string
+    type: object
+  yapar.Action:
+    properties:
+      action:
+        type: string
+      number:
+        type: integer
+      symbol:
+        type: string
+    type: object
+  yapar.SLR:
+    properties:
+      ignored:
+        additionalProperties:
+          type: string
+        type: object
+      table:
+        $ref: '#/definitions/yapar.Table'
+    type: object
+  yapar.SimResponse:
+    properties:
+      accept:
+        type: boolean
+      steps:
+        items:
+          $ref: '#/definitions/yapar.Step'
+        type: array
+    type: object
+  yapar.Step:
+    properties:
+      number:
+        type: integer
+      state:
+        additionalProperties:
+          items: {}
+          type: array
+        type: object
+    type: object
+  yapar.Table:
+    additionalProperties:
+      additionalProperties:
+        $ref: '#/definitions/yapar.Action'
+      type: object
+    type: object
+  yaparroutes.BadRequestResponse:
+    properties:
+      message:
+        type: string
+      status:
+        example: 400
+        type: integer
+    type: object
+  yaparroutes.TableRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  yaparroutes.TableResponse:
+    properties:
+      imageURL:
+        type: string
+      message:
+        example: Table created successfully
+        type: string
+      name:
+        type: string
+      status:
+        example: 200
+        type: integer
+      table:
+        $ref: '#/definitions/yapar.SLR'
+    type: object
+  yaparroutes.Yalp:
+    properties:
+      content:
+        type: string
+      name:
+        type: string
+    type: object
+  yaparroutes.YalpPublic:
+    properties:
+      content:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is a Api to create a language ll1
+  termsOfService: http://swagger.io/terms/
+  title: GO-Api API
+  version: "1.0"
+paths:
+  /api/v1/compare/simulate:
+    post:
+      consumes:
+      - application/json
+      description: Simulate compiler
+      parameters:
+      - description: Simulate object
+        in: body
+        name: simulate
+        required: true
+        schema:
+          $ref: '#/definitions/compare.Simulate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/compare.SimResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/compare.BadRequestResponse'
+      security:
+      - BearerAuth: []
+      summary: Simulate compiler with public resources
+      tags:
+      - compare
+  /api/v1/login:
+    post:
+      consumes:
+      - application/json
+      description: Login
+      parameters:
+      - description: User object that needs to be created
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/login.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/login.GoodResponse'
+        "400":
+          description: Error creating user
+          schema:
+            $ref: '#/definitions/login.BadResponse'
+      summary: Login
+      tags:
+      - login
+  /api/v1/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a user
+      parameters:
+      - description: User object that needs to be created
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/login.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/login.GoodResponse'
+        "400":
+          description: Error creating user
+          schema:
+            $ref: '#/definitions/login.BadResponse'
+      summary: Create a user
+      tags:
+      - login
+  /api/v1/scanners/priv/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a Private scanner from a Yalex
+      parameters:
+      - description: Yalex object
+        in: body
+        name: yalex
+        required: true
+        schema:
+          $ref: '#/definitions/scanners.YalexPublic'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/scanners.ScannerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/scanners.BadRequestResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a Private scanner from a Yalex
+      tags:
+      - yalex
+  /api/v1/scanners/priv/simulate:
+    post:
+      consumes:
+      - application/json
+      description: Simulate a scanner
+      parameters:
+      - description: Scanner object
+        in: body
+        name: yalex
+        required: true
+        schema:
+          $ref: '#/definitions/scanners.ScannerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/scanners.SimScan'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/scanners.BadRequestResponse'
+      security:
+      - BearerAuth: []
+      summary: Simulate a scanner
+      tags:
+      - yalex
+  /api/v1/scanners/public/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a Public scanner from a Yalex
+      parameters:
+      - description: Yalex object
+        in: body
+        name: yalex
+        required: true
+        schema:
+          $ref: '#/definitions/scanners.YalexPublic'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/scanners.ScannerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/scanners.BadRequestResponse'
+      summary: Create a Public scanner from a Yalex
+      tags:
+      - yalex
+  /api/v1/scanners/public/simulate:
+    post:
+      consumes:
+      - application/json
+      description: Simulate a scanner
+      parameters:
+      - description: Scanner object
+        in: body
+        name: yalex
+        required: true
+        schema:
+          $ref: '#/definitions/scanners.ScannerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/scanners.SimScan'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/scanners.BadRequestResponse'
+      summary: Simulate a scanner
+      tags:
+      - yalex
+  /api/v1/yapar/priv/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a Private table SRL from a Yalp
+      parameters:
+      - description: Yalp object
+        in: body
+        name: yalp
+        required: true
+        schema:
+          $ref: '#/definitions/yaparroutes.Yalp'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/yaparroutes.TableResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/yaparroutes.BadRequestResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a Private table SRL from a Yalp
+      tags:
+      - yalp
+  /api/v1/yapar/priv/get:
+    post:
+      consumes:
+      - application/json
+      description: Get a table SRL from user
+      parameters:
+      - description: Table object
+        in: body
+        name: name
+        required: true
+        schema:
+          $ref: '#/definitions/yaparroutes.TableRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/yaparroutes.TableResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/yaparroutes.BadRequestResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a table SRL from user
+      tags:
+      - yalp
+  /api/v1/yapar/pub/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a Public table SRL from a Yalp
+      parameters:
+      - description: Yalp object
+        in: body
+        name: yalp
+        required: true
+        schema:
+          $ref: '#/definitions/yaparroutes.YalpPublic'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/yaparroutes.TableResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/yaparroutes.BadRequestResponse'
+      summary: Create a Public table SRL from a Yalp
+      tags:
+      - yalp
+  /api/v1/yapar/pub/get:
+    post:
+      consumes:
+      - application/json
+      description: Get a table SRL from public
+      parameters:
+      - description: Table object
+        in: body
+        name: name
+        required: true
+        schema:
+          $ref: '#/definitions/yaparroutes.TableRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/yaparroutes.TableResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/yaparroutes.BadRequestResponse'
+      summary: Get a table SRL from public
+      tags:
+      - yalp
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

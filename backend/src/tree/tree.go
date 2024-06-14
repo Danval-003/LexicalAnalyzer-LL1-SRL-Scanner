@@ -301,6 +301,9 @@ func MakeTreeFromMap(Tokens map[string]string) (*Node, []rune) {
 		}
 	}
 
+	// View Tree
+	ToGraph(topTree)
+
 	// Return the top tree
 	return topTree, alphabet
 }

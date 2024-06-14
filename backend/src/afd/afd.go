@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"sort"
 	"strconv"
+	"strings"
 
 	"backend/src/tree"
 
@@ -254,7 +255,7 @@ func VisualizeAFD(state *State, file string, name string) {
 
 
 // Function to Make the AFD from the tree, obtain a optional rune to name the states, for default is "Q"
-func MakeAFD(Tokens map[string]string) (*State, []rune, []*State){
+func MakeAFD(Tokens map[string]string) (*State, []rune, StateSlice){
 	// Obtain keys on order, and make a map with precedence
 	keys := []string{}
 	for key := range Tokens {
@@ -435,6 +436,13 @@ type SimulatedPartJSON struct {
 // Alias to a list SimulatedPart
 type SimulatedParts []*SimulatedPart
 
+// Response Sim
+type ResponseSim struct{
+	SimulatedParts SimulatedParts `json:"simulatedParts"`
+	Accepted bool `json:"accepted"`
+	StringSummary string  `json:"stringSummary"`
+}
+
 // Parts in the simulation
 type SimulationJSON struct {
 	Parts []SimulatedPartJSON `json:"parts"`
@@ -514,16 +522,64 @@ func SimulateAFD(state *State, stringToSimulate string) SimulatedParts {
 	}
 	wg.Wait()
 	simulatedParts := SimulatedParts{}
+	accepted:=true
 	// Iterate over the simulates
 	simu := -1
 	for _, simulate := range simulates {
 		if simulate.Init > simu {
 			simu= simulate.Final
 			simulatedParts = append(simulatedParts, simulate)
+			accepted = accepted && simulate.Accepted
+			
 		}
 	}
 
+
+
 	return simulatedParts
+
+}
+
+
+// Function to simulate the AFD with a string
+func ResponseSimulateAFD(state *State, stringToSimulate string) ResponseSim {
+	// Change the string to a list of runes
+	runes := []rune(stringToSimulate)
+	// Stackto store the saved states
+	actualState := state
+	// User goroutines to simulate the AFD
+	wg := sync.WaitGroup{}
+	// Index of the string
+	index := 0
+	simulates := []*SimulatedPart{}
+	// Iterate over the string
+	for index < len(runes) {
+		simulate := &SimulatedPart{}
+		wg.Add(1)
+		go SimulateAFDPart(actualState, runes, index, &wg, simulate)
+		simulates = append(simulates, simulate)
+		index++
+	}
+	wg.Wait()
+	simulatedParts := SimulatedParts{}
+	accepted:=true
+	// Iterate over the simulates
+	simu := -1
+	simString := ""
+	for _, simulate := range simulates {
+		if simulate.Init > simu {
+			simu= simulate.Final
+			simulatedParts = append(simulatedParts, simulate)
+			accepted = accepted && simulate.Accepted
+			simString += simulate.Token+" "
+		}
+	}
+
+	// Remove the spaces TrimSpace
+	simString = strings.TrimSpace(simString)
+	
+
+	return ResponseSim{SimulatedParts: simulatedParts, Accepted: accepted, StringSummary: simString}
 
 }
 

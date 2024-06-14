@@ -3,7 +3,6 @@ package yalex
 import (
 	"backend/src/afd"
 	"fmt"
-	"os"
 	"strings"
 )
 
@@ -117,7 +116,7 @@ func TokenRules(rules string, rule *map[string]string, declares map[string]strin
 	dec := map[string]string{}
 
 	// ItersOverDeclares
-	for key, _ := range declares {
+	for key := range declares {
 		dec[key] = "\""+key+"\""
 	}
 
@@ -164,7 +163,7 @@ func TokenRules(rules string, rule *map[string]string, declares map[string]strin
 
 
 // Yal function to read a yal file
-func Yal(yal string, name string) error {
+func Yal(yal string) (map[string]map[string]string,error) {
 
 
 	// Make a var to save error
@@ -178,13 +177,14 @@ func Yal(yal string, name string) error {
 		// Create the machine
 		YalexTokens := map[string]string{
 			"COMMET": "\\(\\*[^'*']+\\*\\)",
-			"DECLARE": "\"let\"' '+['a'-'z']+' '*'='' '*[^'\n']+",
-			"RULES": "\"rule\"' '+['a'-'z']+' '*'='[' ''\n''\t']*([^' ''\n''\t']|(\\'[' ''\n''\t']\\'))+(' '*\\{' '*\"return\"' '+['A'-'Z']+' '*\\})?",
-			"EXTRARULE": "\\|' '*([^' ''\n''\t']|(\\'[' ''\n''\t']\\'))+(' '*\\{' '*\"return\"' '+['A'-'Z']+' '*\\})?",
+			"DECLARE": "\"let\"' '+['a'-'z']+' '*'='' '*([^'\n']|\\''\n'\\')+",
+			"RULES": "\"rule\"' '+['a'-'z']+' '*'='[' ''\n''\t']*([^' ''\n''\t']|(\\'[' ''\n''\t']\\'))([^' ''\n''\t']|(\\'[' ''\n''\t']\\'))*(' '*\\{' '*\"return\"' '+['A'-'Z']+' '*\\})?",
+			"EXTRARULE": "\\|' '*([^' ''\n''\t']|(\\'[' ''\n''\t']\\'))([^' ''\n''\t']|(\\'[' ''\n''\t']\\'))*(' '*\\{' '*\"return\"' '+['A'-'Z']+' '*\\})?",
 			"WS":"[' ''\n''\t']+",
 		}
 		var States afd.StateSlice
 		machine,_, States = afd.MakeAFD(YalexTokens)
+		afd.VisualizeAFD(machine, "YalexMachine", "YalexMachine")
 
 		// Save the machine
 		afd.SaveMachine("./src/Machines/Readers/YalexMachine.json", States)
@@ -206,7 +206,7 @@ func Yal(yal string, name string) error {
 			if token.Token == "DECLARE" {
 				err = Declarations(string(token.Runes), &declares)
 				if err != nil {
-					return err
+					return nil,err
 				}
 			} else if token.Token == "RULES" {
 				// Split using '='
@@ -214,7 +214,7 @@ func Yal(yal string, name string) error {
 				// Check if the length is not 2
 				if len(rules) != 2 {
 					// Return an error
-					return fmt.Errorf("error in rules: %s", string(token.Runes))
+					return nil, fmt.Errorf("error in rules: %s", string(token.Runes))
 				}
 				// Save the actual rule
 				actualRule = strings.TrimSpace(rules[0][5:])
@@ -231,7 +231,7 @@ func Yal(yal string, name string) error {
 				
 				// Verify if the actual rule exists
 				if _, ok := Rules[actualRule]; !ok {
-					return fmt.Errorf("error the rule: %s not exists", actualRule)
+					return nil, fmt.Errorf("error the rule: %s not exists", actualRule)
 				}
 
 				// Add the rule in actual rule
@@ -241,27 +241,33 @@ func Yal(yal string, name string) error {
 				Rules[actualRule] = rule
 			}
 		} else { 
-			return fmt.Errorf("token: %s not accepted", token.Token)
+			return nil, fmt.Errorf("token: %s not accepted", token.Token)
 		}
 	}
-	// Create a carpet to save the rules machines using the name
-	// Verify if the carpet exists using os
-	if _, err := os.Stat("./src/Machines/Scaners/"+name); os.IsNotExist(err) {
-		// Create the carpet
-		os.MkdirAll("./src/Machines/Scaners/"+name, os.ModePerm)
-	}
+
+	// Create a map to save the machines
+	machines := make(map[string]map[string]string)
+
 
 	// Iterate over the rules
 	for key, value := range Rules {
-
+		machines[key] = map[string]string{}
 		// Create the machine
-		_,_, machine := afd.MakeAFD(value)
+		init,_, states := afd.MakeAFD(value)
+		afd.SimulateAFD(init, " ")
 
+		imageUrll:= "https://quickchart.io/graphviz?graph="
+
+		bytesBuffer := states.Encode()
 		// Save the machine
-		afd.SaveMachine("./src/Machines/Scaners/"+name+"/"+key+".json", machine)
+		machines[key]["Machine"] = bytesBuffer
+
+		// Save the machine url
+		machines[key]["Image"] = imageUrll
+		
 	}
 
-	return err
+	return machines, err
 }
 
 
