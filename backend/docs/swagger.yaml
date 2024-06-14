@@ -101,6 +101,10 @@ definitions:
     type: object
   scanners.ScannerResponse:
     properties:
+      filesId:
+        items:
+          type: string
+        type: array
       message:
         example: Scanner created successfully
         type: string
@@ -515,6 +519,31 @@ paths:
       summary: Get a table SRL from public
       tags:
       - yalp
+  /image/{fileID}:
+    get:
+      consumes:
+      - application/json
+      description: Get an image from GridFS by file ID
+      parameters:
+      - description: File ID
+        in: path
+        name: fileID
+        required: true
+        type: string
+      produces:
+      - image/png
+      responses:
+        "200":
+          description: Image
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/scanners.BadRequestResponse'
+      summary: Get an image from GridFS by file ID
+      tags:
+      - image
 securityDefinitions:
   BearerAuth:
     in: header

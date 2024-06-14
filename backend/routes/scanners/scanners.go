@@ -4,12 +4,16 @@ import (
 	"backend/routes/login"
 	"backend/src/afd"
 	"backend/src/yalex"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/gridfs"
 )
 
 // Struct to represent Yalex Priv
@@ -28,6 +32,7 @@ type ScannerResponse struct {
 	Message string      `json:"message" example:"Scanner created successfully"`
 	Status  int         `json:"status" example:"200"`
 	Names    []string      `json:"names"`
+	FilesId  []string      `json:"filesId"`
 }
 
 // Struct to represent a Bad Request Response
@@ -42,6 +47,67 @@ type ScannerSave struct {
 	Name  string   `json:"name"`
 	Username string `json:"username"`
 	ImageURL string `json:"imageURL"`
+}
+
+
+// Function to upload image bytes to GridFS and get the file ID
+func UploadImageToGridFS(imageBytes []byte, client *mongo.Client) (interface{}, error) {
+	bucket, err := gridfs.NewBucket(
+		client.Database("GOLL1"),
+	)
+	if err != nil {
+		return primitive.NilObjectID, err
+	}
+
+	uploadStream, err := bucket.OpenUploadStream("image.png")
+	if err != nil {
+		return primitive.NilObjectID, err
+	}
+	defer uploadStream.Close()
+
+	_, err = uploadStream.Write(imageBytes)
+	if err != nil {
+		return primitive.NilObjectID, err
+	}
+
+	return uploadStream.FileID, nil
+}
+
+// Function to get an image from GridFS by file ID
+// @Summary Get an image from GridFS by file ID
+// @Description Get an image from GridFS by file ID
+// @Tags image
+// @Accept json
+// @Produce image/png
+// @Param fileID path string true "File ID"
+// @Success 200 {string} string "Image"
+// @Failure 400 {object} BadRequestResponse
+// @Router /image/{fileID} [get]
+func GetImageHandler(w http.ResponseWriter, r *http.Request) {
+	fileIDHex := r.URL.Path[len("/image/"):]
+	fileID, err := primitive.ObjectIDFromHex(fileIDHex)
+	if err != nil {
+		http.Error(w, "Invalid file ID", http.StatusBadRequest)
+		return
+	}
+
+	bucket, err := gridfs.NewBucket(
+		login.Client.Database("GOLL1"),
+	)
+	if err != nil {
+		http.Error(w, "Error creating GridFS bucket", http.StatusInternalServerError)
+		return
+	}
+
+	var buf bytes.Buffer
+	_, err = bucket.DownloadToStream(fileID, &buf)
+	if err != nil {
+		http.Error(w, "Error downloading file from GridFS", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "image/png")
+	w.Write(buf.Bytes())
 }
 
 
@@ -99,16 +165,23 @@ func CreatePrivateScanner(w http.ResponseWriter, r *http.Request) {
 
 	names := []string{}
 
+	filesIds := []string{}
+
+
 	for key, value := range scanners {
+
+		bIm := []byte(value["Image"])
+		fileID, err := UploadImageToGridFS(bIm, login.Client)
 		_, err = collection.InsertOne(
 			r.Context(),
 			ScannerSave{
 				Name: key,
 				Scanner: value["Machine"],
 				Username: user,
-				ImageURL: "https://www.google.com",
+				ImageURL: string(fileID.(primitive.ObjectID).Hex()),
 			},
 		)
+		filesIds = append(filesIds, string(fileID.(primitive.ObjectID).Hex()))
 		
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -128,6 +201,7 @@ func CreatePrivateScanner(w http.ResponseWriter, r *http.Request) {
 			Message: "Scanner created successfully",
 			Status:  http.StatusOK,
 			Names:   names,
+			FilesId: filesIds,
 		},
 	)
 
@@ -176,17 +250,23 @@ func CreatePublicScanner(w http.ResponseWriter, r *http.Request) {
 	collection:= login.Client.Database("GOLL1").Collection("scanners")
 
 	names := []string{}
+	filesIds := []string{}
 
 	for key, value := range scanners {
+		bIm := []byte(value["Image"])
+		fileID, err := UploadImageToGridFS(bIm, login.Client)
+
 		_, err = collection.InsertOne(
 			r.Context(),
 			ScannerSave{
 				Name: id.String()+":"+key,
 				Scanner: value["Machine"],
 				Username: "public",
-				ImageURL: "https://www.google.com",
+				ImageURL: string(fileID.(primitive.ObjectID).Hex()),
 			},
 		)
+
+		filesIds = append(filesIds, string(fileID.(primitive.ObjectID).Hex()))
 		
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -206,6 +286,7 @@ func CreatePublicScanner(w http.ResponseWriter, r *http.Request) {
 			Message: "Scanner created successfully",
 			Status:  http.StatusOK,
 			Names:   names,
+			FilesId: filesIds,
 		},
 	)
 
@@ -266,8 +347,6 @@ func SimulatePublicScanner(w http.ResponseWriter, r *http.Request) {
 			})
 		return
 	}
-
-	fmt.Println(" ", )
 
 	scannerM := afd.DecodeAFD(scanner.Scanner)
 

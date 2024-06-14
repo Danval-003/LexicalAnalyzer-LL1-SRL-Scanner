@@ -184,7 +184,7 @@ func Yal(yal string) (map[string]map[string]string,error) {
 		}
 		var States afd.StateSlice
 		machine,_, States = afd.MakeAFD(YalexTokens)
-		afd.VisualizeAFD(machine, "YalexMachine", "YalexMachine")
+		
 
 		// Save the machine
 		afd.SaveMachine("./src/Machines/Readers/YalexMachine.json", States)
@@ -256,14 +256,12 @@ func Yal(yal string) (map[string]map[string]string,error) {
 		init,_, states := afd.MakeAFD(value)
 		afd.SimulateAFD(init, " ")
 
-		imageUrll:= "https://quickchart.io/graphviz?graph="
-
 		bytesBuffer := states.Encode()
 		// Save the machine
 		machines[key]["Machine"] = bytesBuffer
 
 		// Save the machine url
-		machines[key]["Image"] = imageUrll
+		machines[key]["Image"] = string(afd.VisualizeAFD(init))
 		
 	}
 

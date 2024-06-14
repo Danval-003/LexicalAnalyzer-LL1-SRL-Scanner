@@ -1,7 +1,6 @@
 package afd
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -19,6 +18,8 @@ import (
 	"encoding/json"
 
 	"sync"
+
+	"github.com/google/uuid"
 )
 
 // Struct to represent a state in the AFD
@@ -214,11 +215,13 @@ func AddState(state *State, VisitedStates map[string]*State, Graph *gographviz.G
 }
 
 // Function to visualize the AFD with graphviz
-func VisualizeAFD(state *State, file string, name string) {
+func VisualizeAFD(state *State) []byte {
 	g := gographviz.NewGraph()
 	g.SetName("G")
 	g.SetDir(true)
 	g.AddAttr("G", "rankdir", "LR")
+
+	tempId := uuid.New().String()
 
 	VisitedStates := map[string]*State{}
 
@@ -228,29 +231,36 @@ func VisualizeAFD(state *State, file string, name string) {
 
 	s := g.String()
 	// Make a dot file
-	f, _ := os.Create(file+".dot")
+	f, _ := os.Create("./temp/"+tempId+".dot")
 	f.WriteString(s)
 	f.Close()
 
-	// Make a pdf
-	cmd := "dot -Tpdf "+file+".dot -o "+file+".pdf"
+	// Make a png
+	cmd := "dot -Tpng "+"./temp/"+tempId+".dot -o "+"./temp/"+tempId+".png"
 	 
-
-	var err error
 
 	switch runtime.GOOS {
 	case "linux":
-		err = exec.Command("sh", "-c", cmd).Run()
+		_ = exec.Command("sh", "-c", cmd).Run()
 	case "windows":
-		err = exec.Command("cmd", "/C", cmd).Run()
+		_ = exec.Command("cmd", "/C", cmd).Run()
 	default:
-		err = exec.Command("bash", "-c", cmd).Run()
+		_ = exec.Command("bash", "-c", cmd).Run()
 	}
 
-	if err != nil {
-		fmt.Println(err)
-	}
+	// Read the image and obtain bytes
+	file, _ := os.Open("./temp/"+tempId+".png")
+	defer file.Close()
+	fileInfo, _ := file.Stat()
+	size := fileInfo.Size()
+	bytes := make([]byte, size)
+	_, _ = file.Read(bytes)
 
+	// Remove the files
+	_ = os.Remove("./temp/"+tempId+".dot")
+	_ = os.Remove("./temp/"+tempId+".png")
+
+	return bytes
 }
 
 

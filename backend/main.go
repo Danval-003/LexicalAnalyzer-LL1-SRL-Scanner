@@ -81,6 +81,9 @@ func main() {
 
 	api.HandleFunc("/compare/simulate", compare.SimulateCompile).Methods(http.MethodPost)
 
+	// Do route image with id for param
+	r.HandleFunc("/image/{id}", scanners.GetImageHandler).Methods(http.MethodGet)
+
 	// Swagger
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 

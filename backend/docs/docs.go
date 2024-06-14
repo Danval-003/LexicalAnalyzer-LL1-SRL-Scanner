@@ -480,6 +480,44 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/image/{fileID}": {
+            "get": {
+                "description": "Get an image from GridFS by file ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "image/png"
+                ],
+                "tags": [
+                    "image"
+                ],
+                "summary": "Get an image from GridFS by file ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "File ID",
+                        "name": "fileID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Image",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/scanners.BadRequestResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -636,6 +674,12 @@ const docTemplate = `{
         "scanners.ScannerResponse": {
             "type": "object",
             "properties": {
+                "filesId": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "message": {
                     "type": "string",
                     "example": "Scanner created successfully"
