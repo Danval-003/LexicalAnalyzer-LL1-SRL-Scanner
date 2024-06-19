@@ -42,7 +42,7 @@ export class PrincipalComponent {
       for (let i = 0; i < response.names.length; i++) {
         const scanner = {
           name: response.names[i],
-          image: "http://localhost:8000/image/"+response.filesId[i]
+          image: "https://lexicalanalyzer-ll1-srl-scanner.onrender.com/image/"+response.filesId[i]
         };
 
         this.scanners.push(scanner);
