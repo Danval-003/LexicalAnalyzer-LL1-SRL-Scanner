@@ -1,25 +1,105 @@
 package main
 
 import (
-	_ "backend/docs" // This is to import generated docs
-	"backend/routes/login"
-	yaparroutes "backend/routes/yaparRoutes"
-	scanners "backend/routes/scanners"
-	compare "backend/routes/compare"
 	"fmt"
 	"net/http"
+	"runtime"
+	"sync"
+	"time"
 
-	"github.com/gorilla/mux"
-	"github.com/gorilla/handlers" // Import the missing package
+	"backend/routes/compare"
+	"backend/routes/login"
+	scanners "backend/routes/scanners"
+	yaparroutes "backend/routes/yaparRoutes"
+
+	_ "backend/docs" // This is to import generated docs
+
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	httpSwagger "github.com/swaggo/http-swagger"
-
+	"github.com/manucorporat/stats"
+	swaggerFiles "github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 )
 
+var (
+	ips        = stats.New()
+	messages   = stats.New()
+	users      = stats.New()
+	mutexStats sync.RWMutex
+	savedStats map[string]uint64
+)
+
+func statsWorker() {
+	c := time.Tick(1 * time.Second)
+	var lastMallocs uint64
+	var lastFrees uint64
+	for range c {
+		var stats runtime.MemStats
+		runtime.ReadMemStats(&stats)
+
+		mutexStats.Lock()
+		savedStats = map[string]uint64{
+			"timestamp":  uint64(time.Now().Unix()),
+			"HeapInuse":  stats.HeapInuse,
+			"StackInuse": stats.StackInuse,
+			"Mallocs":    stats.Mallocs - lastMallocs,
+			"Frees":      stats.Frees - lastFrees,
+			"Inbound":    uint64(messages.Get("inbound")),
+			"Outbound":   uint64(messages.Get("outbound")),
+			"Connected":  connectedUsers(),
+		}
+		lastMallocs = stats.Mallocs
+		lastFrees = stats.Frees
+		messages.Reset()
+		mutexStats.Unlock()
+	}
+}
+
+func connectedUsers() uint64 {
+	connected := users.Get("connected") - users.Get("disconnected")
+	if connected < 0 {
+		return 0
+	}
+	return uint64(connected)
+}
+
+// Stats returns savedStats data.
+func Stats() map[string]uint64 {
+	mutexStats.RLock()
+	defer mutexStats.RUnlock()
+
+	return savedStats
+}
+
+// Wrapper to convert http.HandlerFunc to gin.HandlerFunc
+func WrapHandler(h http.HandlerFunc) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        h(c.Writer, c.Request)
+    }
+}
+
+// Wrapper to convert http.Handler to gin.HandlerFunc
+func WrapHandlerWithHandler(h http.Handler) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        h.ServeHTTP(c.Writer, c.Request)
+    }
+}
+
+// ConfigRuntime sets the number of operating system threads.
+func ConfigRuntime() {
+	nuCPU := runtime.NumCPU()
+	runtime.GOMAXPROCS(nuCPU)
+	fmt.Printf("Running with %d CPUs\n", nuCPU)
+}
+
+// StartWorkers start starsWorker by goroutine.
+func StartWorkers() {
+	go statsWorker()
+}
 
 // @title GO-Api API
 // @version 1.0
-// @description This is a Api to create a language ll1
+// @description This is an API to create a language ll1
 // @termsOfService http://swagger.io/terms/
 // @securityDefinitions.apikey BearerAuth
 // @in header
@@ -29,63 +109,78 @@ import (
 // @contact.email danarvare@outlook.com
 // @BasePath /api/v1
 func main() {
+    // Create var to store the error
+    var err error
 
-	// Create var to store the error
-	var err error
+	// Configure the runtime
+	ConfigRuntime()
 
-	// Load the .env file
-	err = godotenv.Load()
-	if err != nil {
-		fmt.Println(err)
-		// Finish the program
-		return
-	}
+	// Start the workers
+	StartWorkers()
 
-	err = login.CreateClientLogin()
-	if err != nil {
-		fmt.Println(err)
-		// Finish the program
-		return
-	}
 
-	r := mux.NewRouter()
 
-	
-	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
-	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
-	originsOk := handlers.AllowedOrigins([]string{"*"})
+    // Load the .env file
+    err = godotenv.Load()
+    if err != nil {
+        fmt.Println(err)
+        // Finish the program
+        return
+    }
 
-	// Define the routes and their handlers
-	// Define the API routes
-	api := r.PathPrefix("/api/v1").Subrouter()
-	api.HandleFunc("/register", login.CreateUser).Methods(http.MethodPost)
-	api.HandleFunc("/login", login.Login).Methods(http.MethodPost)
-	api.Handle("/yapar/priv/create", login.IsAuthorized(yaparroutes.CreatePrivateTable)).Methods(http.MethodPost)
-	api.Handle("/yapar/priv/get", login.IsAuthorized(yaparroutes.GetPrivateTable)).Methods(http.MethodPost)
-	api.HandleFunc("/yapar/pub/create", yaparroutes.CreatePublicTable).Methods(http.MethodPost)
-	api.HandleFunc("/yapar/pub/get", yaparroutes.GetPublicTable).Methods(http.MethodPost)
+    err = login.CreateClientLogin()
+    if err != nil {
+        fmt.Println(err)
+        // Finish the program
+        return
+    }
 
-	api.Handle("/scanners/priv/create", login.IsAuthorized(scanners.CreatePrivateScanner)).Methods(http.MethodPost)
-	api.Handle("/scanners/priv/simulate", login.IsAuthorized(scanners.SimulatePrivateScanner)).Methods(http.MethodPost)
-	api.HandleFunc("/scanners/public/create", scanners.CreatePublicScanner).Methods(http.MethodPost)
-	api.HandleFunc("/scanners/public/simulate", scanners.SimulatePublicScanner).Methods(http.MethodPost)
+	gin.SetMode(gin.ReleaseMode)
 
-	api.HandleFunc("/compare/simulate", compare.SimulateCompile).Methods(http.MethodPost)
+    r := gin.New()
 
-	// Do route image with id for param
-	r.HandleFunc("/image/{id}", scanners.GetImageHandler).Methods(http.MethodGet)
+    // CORS middleware
+    r.Use(func(c *gin.Context) {
+        c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+        c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, X-Requested-With")
+        if c.Request.Method == "OPTIONS" {
+            c.AbortWithStatus(204)
+            return
+        }
+        c.Next()
+    })
 
-	// Swagger
-	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+    // Define the API routes
+    api := r.Group("/api/v1")
+    {
+        api.POST("/register", WrapHandler(login.CreateUser))
+        api.POST("/login", WrapHandler(login.Login))
+        api.POST("/yapar/priv/create", WrapHandlerWithHandler(login.IsAuthorized(yaparroutes.CreatePrivateTable)))
+        api.POST("/yapar/priv/get", WrapHandlerWithHandler(login.IsAuthorized(yaparroutes.GetPrivateTable)))
+        api.POST("/yapar/pub/create", WrapHandler(yaparroutes.CreatePublicTable))
+        api.POST("/yapar/pub/get", WrapHandler(yaparroutes.GetPublicTable))
 
-	// Start the serverc
-	fmt.Println("Starting server at port 8000")
-	r.Use(mux.CORSMethodMiddleware(r))
-	err = http.ListenAndServe(":8000", handlers.CORS(originsOk, headersOk, methodsOk)(r))
+        api.POST("/scanners/priv/create", WrapHandlerWithHandler(login.IsAuthorized(scanners.CreatePrivateScanner)))
+        api.POST("/scanners/priv/simulate", WrapHandlerWithHandler(login.IsAuthorized(scanners.SimulatePrivateScanner)))
+        api.POST("/scanners/public/create", WrapHandler(scanners.CreatePublicScanner))
+        api.POST("/scanners/public/simulate", WrapHandler(scanners.SimulatePublicScanner))
 
-	if err != nil {
-		fmt.Println(err)
-		// Finish the program
-		return
-	}
+        api.POST("/compare/simulate", WrapHandler(compare.SimulateCompile))
+    }
+
+    // Route for image with id param
+    r.GET("/image/:id", WrapHandler(scanners.GetImageHandler))
+
+    // Swagger
+    r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+    // Start the server
+    fmt.Println("Starting server at port 8000")
+    err = r.Run(":8080")
+    if err != nil {
+        fmt.Println(err)
+        // Finish the program
+        return
+    }
 }

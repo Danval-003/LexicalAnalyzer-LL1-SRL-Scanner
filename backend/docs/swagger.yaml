@@ -218,7 +218,7 @@ definitions:
     type: object
 info:
   contact: {}
-  description: This is a Api to create a language ll1
+  description: This is an API to create a language ll1
   termsOfService: http://swagger.io/terms/
   title: GO-Api API
   version: "1.0"

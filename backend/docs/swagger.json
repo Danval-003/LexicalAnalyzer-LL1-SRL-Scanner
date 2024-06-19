@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a Api to create a language ll1",
+        "description": "This is an API to create a language ll1",
         "title": "GO-Api API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {},

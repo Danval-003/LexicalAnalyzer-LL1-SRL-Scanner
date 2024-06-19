@@ -866,7 +866,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "GO-Api API",
-	Description:      "This is a Api to create a language ll1",
+	Description:      "This is an API to create a language ll1",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

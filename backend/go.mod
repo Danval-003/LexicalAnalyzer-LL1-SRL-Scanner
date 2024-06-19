@@ -72,6 +72,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/handlers v1.5.2
 	github.com/gorilla/mux v1.8.1
+	github.com/manucorporat/stats v0.0.0-20180402194714-3ba42d56d227
 	github.com/swaggo/http-swagger v1.3.4
 	golang.org/x/net v0.26.0 // indirect
 	gonum.org/v1/gonum v0.9.1 // indirect
