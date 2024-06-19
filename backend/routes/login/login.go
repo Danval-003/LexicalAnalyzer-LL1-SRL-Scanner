@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -18,9 +17,6 @@ import (
 type contextKey string
 
 const UserContextKey contextKey = "user"
-
-// Load the .env file
-var _ = godotenv.Load()
 
 // Secret key to sign the JWT
 var jwtKey = []byte(os.Getenv("SECRET_KEY"))
