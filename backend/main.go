@@ -16,7 +16,6 @@ import (
 	_ "backend/docs" // This is to import generated docs
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"github.com/manucorporat/stats"
 	swaggerFiles "github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
@@ -121,16 +120,6 @@ func main() {
 
 	// Start the workers
 	StartWorkers()
-
-
-
-    // Load the .env file
-    err = godotenv.Load()
-    if err != nil {
-        fmt.Println(err)
-        // Finish the program
-        return
-    }
 
     err = login.CreateClientLogin()
     if err != nil {
