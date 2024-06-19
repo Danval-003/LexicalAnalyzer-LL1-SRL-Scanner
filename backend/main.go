@@ -179,6 +179,10 @@ func main() {
     // Swagger
     r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	port := os.Getenv("PORT")
+
+	if port == "" {
+		port = "8080"
+	}
     // Start the server
     fmt.Println("Starting server at port", port)
     err = r.Run(":" + port)
