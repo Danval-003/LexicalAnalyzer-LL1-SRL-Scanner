@@ -1,0 +1,26 @@
+div {
+  height: 90vh;
+  width: 60vw;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+// Edit scrollbar
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 25px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+

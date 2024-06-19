@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<div class="body-template">
+  <h1>
+    Create Scanners and Table SLR
+  </h1>
+
+
+  <div class="inputs-yfiles">
+    <div class="input-text-area yalex">
+      <label for="yalex">Yalex code here</label>
+      <div class="text-yal">
+        <textarea #inputrefyal></textarea>
+      </div>
+      <button (click)="onContentYalexChange(inputrefyal.value)">Create Scanner</button>
+      <p [class.bad]="errorYalex" >{{ yalex }}</p>
+      <div class="image">
+        <!--Iterate over variable "Scanners" with ng-->
+        <div *ngFor="let scanner of scanners">
+          <app-scanner [image]="scanner.image" [name]="scanner.name"></app-scanner>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-text-area yalex">
+      <label for="yapar">Yapar code here</label>
+      <div class="text-yal">
+        <textarea #inputrefyalp></textarea>
+      </div>
+      <button (click)="onContentYaparChange(inputrefyalp.value)">Create Table</button>
+      <p [class.bad]="errorYapar">{{ yapar }}</p>
+      <div class="image">
+        <div *ngIf="slr.name !=='' && slr.image !==''">
+          <app-table-slr [image]="slr.image" [name]="slr.name"></app-table-slr>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+

@@ -8,8 +8,8 @@
 %token PLUS
 %token TIMES
 %token LPAREN RPAREN
-%token WHITESPACE
-IGNORE WHITESPACE
+%token WS
+IGNORE WS
 
 expression:
     expression PLUS term

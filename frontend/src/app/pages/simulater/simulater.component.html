@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<div class="body-template">
+  <h1>Simulator</h1>
+  <div class="simFile">
+    <div class="yalSim">
+      <h3 for="yalex">Scanner name here</h3>
+      <input type="text" #inputrefyal>
+    </div>
+    <div class="yalSim">
+      <h3 for="yalex">SLR Table name here</h3>
+      <input type="text" #inputrefyap>
+    </div>
+  </div>
+
+  <div class="simFile">
+    <div class="simtext">
+      <h3 for="yalex">Text to simulate her</h3>
+      <textarea #inputsim></textarea>
+    </div>
+  </div>
+
+  <button (click)="onSimulate(inputsim.value, inputrefyal.value, inputrefyap.value)">
+    Simulate
+  </button>
+  <div *ngIf="message!==''" >
+    <h4 [class.accept]="success">{{message}}</h4>
+    <p>{{resultScanner}}</p>
+  </div>
+
+</div>

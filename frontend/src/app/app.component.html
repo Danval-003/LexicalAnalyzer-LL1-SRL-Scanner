@@ -1,4 +1,81 @@
+<!DOCTYPE html>
 <!----Create a Page---->
-
 <!-- Path: frontend/src/app/app.component.html -->
-<app-animated-title [text]="'HolaDinamo'"></app-animated-title>
+<html lang="en">
+  <style>
+
+    nav {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 10px;
+      font-size: 1.3em;
+      text-transform: capitalize;
+    }
+    nav a:hover {
+      background-color: #555;
+    }
+
+    nav div {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 5vw;
+      margin-left: 5vw;
+    }
+
+    nav div a:first-child {
+      border-top-left-radius: 6px;
+      border-bottom-left-radius: 6px;
+    }
+
+    nav div a:last-child {
+      border-top-right-radius: 6px;
+      border-bottom-right-radius: 6px;
+    }
+
+    nav h1 {
+      margin-top: 2vh;
+      margin-bottom: 2vh;
+      font-size: 2em;
+    }
+    nav .principal-text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+    }
+
+    nav .principal-text h1, h2 {
+      margin: 0;
+    }
+
+    nav .principal-text h2 {
+      font-size: 1.3em;
+      font-weight: 300;
+      text-transform: capitalize;
+    }
+
+
+  </style>
+
+  <nav>
+    <div class="principal-text">
+      <h1>Lexical Analyzer </h1>
+      <h2> Scanner and SRL</h2>
+    </div>
+    <div>
+      <a href="/">principal</a>
+      <a href="/simulator">Simulator</a>
+      <a href="/about-us">about</a>
+    </div>
+  </nav>
+  <router-outlet></router-outlet>
+</html>

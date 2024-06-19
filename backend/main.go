@@ -10,25 +10,12 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/handlers" // Import the missing package
 	"github.com/joho/godotenv"
 	httpSwagger "github.com/swaggo/http-swagger"
 
 )
 
-func setupCORS(next http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        w.Header().Set("Access-Control-Allow-Origin", "*")
-        w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-        w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-        if r.Method == "OPTIONS" {
-            w.WriteHeader(http.StatusOK)
-            return
-        }
-
-        next.ServeHTTP(w, r)
-    })
-}
 
 // @title GO-Api API
 // @version 1.0
@@ -62,7 +49,11 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	r.Use(setupCORS)
+
+	
+	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	originsOk := handlers.AllowedOrigins([]string{"*"})
 
 	// Define the routes and their handlers
 	// Define the API routes
@@ -89,7 +80,8 @@ func main() {
 
 	// Start the serverc
 	fmt.Println("Starting server at port 8000")
-	err = http.ListenAndServe(":8000", r)
+	r.Use(mux.CORSMethodMiddleware(r))
+	err = http.ListenAndServe(":8000", handlers.CORS(originsOk, headersOk, methodsOk)(r))
 
 	if err != nil {
 		fmt.Println(err)
