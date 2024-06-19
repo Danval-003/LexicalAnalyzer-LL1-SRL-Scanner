@@ -1,7 +1,8 @@
 {
-    "content":"\n%token ID\n%token PLUS\n%token TIMES\n%token LPAREN RPAREN\n%token WS\nIGNORE WS\nexpression:\nexpression PLUS term\n| term\n;\nterm:\nterm TIMES factor\n| factor\n;\nfactor:\nLPAREN expression RPAREN\n| ID\n;",
-    "name": "Hola",
-    "other": {
+    "slr":{        
+        "content":"\n%token ID\n%token PLUS\n%token TIMES\n%token LPAREN RPAREN\n%token WS\nIGNORE WS\nexpression:\nexpression PLUS term\n| term\n;\nterm:\nterm TIMES factor\n| factor\n;\nfactor:\nLPAREN expression RPAREN\n| ID\n;"
+    },
+    "scanner": {
         "content": "let delim = [' ''\t''\n']\nlet ws = delim+\nlet letter = ['A'-'Z''a'-'z']\nlet digit = ['0'-'9']\nlet id = letter(letter|digit)*\nrule tokens =\nws        { return WS }\n| id        { return ID }               (* Cambie por una accion valida, que devuelva el token *)\n| '+'       { return PLUS }\n| '*'       { return TIMES }\n| '('       { return LPAREN }\n| ')'       { return RPAREN }\n\n(* Introducir cualquier trailer aqui *)"
     }
 }

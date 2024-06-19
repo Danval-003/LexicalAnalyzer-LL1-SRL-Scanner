@@ -113,6 +113,9 @@ func main() {
     // Create var to store the error
     var err error
 
+	fmt.Println("Starting server...")
+	fmt.Println(os.Getenv("MONGO_URI"))
+
 	// Configure the runtime
 	ConfigRuntime()
 
