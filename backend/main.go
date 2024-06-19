@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"runtime"
 	"sync"
 	"time"
@@ -174,10 +175,10 @@ func main() {
 
     // Swagger
     r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
+	port := os.Getenv("PORT")
     // Start the server
-    fmt.Println("Starting server at port 8000")
-    err = r.Run(":8080")
+    fmt.Println("Starting server at port", port)
+    err = r.Run(":" + port)
     if err != nil {
         fmt.Println(err)
         // Finish the program
