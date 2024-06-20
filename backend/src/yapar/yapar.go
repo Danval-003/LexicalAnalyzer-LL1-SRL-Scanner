@@ -354,6 +354,10 @@ func SimulateTable(slr SLR, input string) ([]byte ,error) {
 			runeExpected := []string{}
 			// Iterate over the table
 			for _, value := range table[state] {
+				// Verify if value not are in Uppercase
+				if value.Symbol != strings.ToUpper(value.Symbol) {
+					continue
+				}
 				runeExpected = append(runeExpected, value.Symbol)
 			}
 			// Convert list to string
