@@ -1,15 +1,16 @@
 package afd
 
 import (
+	"bytes"
 	"io"
 	"os"
-	"os/exec"
-	"runtime"
 	"sort"
 	"strconv"
 	"strings"
 
 	"backend/src/tree"
+
+	"github.com/goccy/go-graphviz"
 
 	// Import to visualize the AFD with graphviz
 	"github.com/awalterschulze/gographviz"
@@ -18,8 +19,6 @@ import (
 	"encoding/json"
 
 	"sync"
-
-	"github.com/google/uuid"
 )
 
 // Struct to represent a state in the AFD
@@ -175,92 +174,59 @@ func MachineExists(filename string) bool {
 }
 
 
-// Function to Add a State to the Graph
 func AddState(state *State, VisitedStates map[string]*State, Graph *gographviz.Graph) {
-	// Shape is a circle if not accept, doublecircle if accept
-	shape := "circle"
-	if state.Accept {
-		shape = "doublecircle"
-	}
-	// Create the state
-	Graph.AddNode("G", state.Name, map[string]string{"shape": shape})
+    shape := "circle"
+    if state.Accept {
+        shape = "doublecircle"
+    }
+    Graph.AddNode("G", state.Name, map[string]string{"shape": shape})
 
-
-	// Add the transitions
-	for symbol, nextState := range state.Transitions {
-		// Check if the next state is in the visited states
-		if _, ok := VisitedStates[nextState.Name]; !ok {
-			VisitedStates[nextState.Name] = nextState
-			AddState(nextState, VisitedStates, Graph)
-		}
-		// Add the transition
-		symbolString:= ""
-		if symbol == '"'{
-			symbolString = "\"\\\"\""
-		} else {
-			// Verify if the symbol is supported for graphviz
-			if symbol == '\\'{
-				symbolString = "\"\\\\\""
-			} else {
-				if symbol < 32 || symbol == 127 {
-					symbolString = "\"\\x"+strconv.FormatInt(int64(symbol), 16)+"\""
-				} else {
-					symbolString = "\""+string(symbol)+"\""
-				}
-			}
-		}
-		Graph.AddEdge(state.Name, nextState.Name, true, map[string]string{"label": symbolString})
-	}
-
+    for symbol, nextState := range state.Transitions {
+        if _, ok := VisitedStates[nextState.Name]; !ok {
+            VisitedStates[nextState.Name] = nextState
+            AddState(nextState, VisitedStates, Graph)
+        }
+        symbolString := ""
+        if symbol == '"' {
+            symbolString = "\"\\\"\""
+        } else if symbol == '\\' {
+            symbolString = "\"\\\\\""
+        } else if symbol < 32 || symbol == 127 {
+            symbolString = "\"\\x" + strconv.FormatInt(int64(symbol), 16) + "\""
+        } else {
+            symbolString = "\"" + string(symbol) + "\""
+        }
+        Graph.AddEdge(state.Name, nextState.Name, true, map[string]string{"label": symbolString})
+    }
 }
 
-// Function to visualize the AFD with graphviz
-func VisualizeAFD(state *State) []byte {
-	g := gographviz.NewGraph()
-	g.SetName("G")
-	g.SetDir(true)
-	g.AddAttr("G", "rankdir", "LR")
+func VisualizeAFD(state *State) ([]byte, error) {
+    g := gographviz.NewGraph()
+    g.SetName("G")
+    g.SetDir(true)
+    g.AddAttr("G", "rankdir", "LR")
 
-	tempId := uuid.New().String()
+    VisitedStates := map[string]*State{}
+    VisitedStates[state.Name] = state
 
-	VisitedStates := map[string]*State{}
+    AddState(state, VisitedStates, g)
 
-	VisitedStates[state.Name] = state
+    s := g.String()
 
-	AddState(state, VisitedStates, g)
+    graphvizGraph, err := graphviz.ParseBytes([]byte(s))
+    if err != nil {
+        return nil, err
+    }
 
-	s := g.String()
-	// Make a dot file
-	f, _ := os.Create("./temp/"+tempId+".dot")
-	f.WriteString(s)
-	f.Close()
+    gv := graphviz.New()
+    defer gv.Close()
 
-	// Make a png
-	cmd := "dot -Tpng "+"./temp/"+tempId+".dot -o "+"./temp/"+tempId+".png"
-	 
+    var buf bytes.Buffer
+    if err := gv.Render(graphvizGraph, graphviz.PNG, &buf); err != nil {
+        return nil, err
+    }
 
-	switch runtime.GOOS {
-	case "linux":
-		_ = exec.Command("sh", "-c", cmd).Run()
-	case "windows":
-		_ = exec.Command("cmd", "/C", cmd).Run()
-	default:
-		_ = exec.Command("bash", "-c", cmd).Run()
-	}
-
-	// Read the image and obtain bytes
-	file, _ := os.Open("./temp/"+tempId+".png")
-	defer file.Close()
-	fileInfo, _ := file.Stat()
-	size := fileInfo.Size()
-	bytes := make([]byte, size)
-	_, _ = file.Read(bytes)
-
-	// Remove the files
-	_ = os.Remove("./temp/"+tempId+".dot")
-	_ = os.Remove("./temp/"+tempId+".png")
-
-	return bytes
+    return buf.Bytes(), nil
 }
 
 
