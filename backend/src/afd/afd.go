@@ -200,7 +200,7 @@ func AddState(state *State, VisitedStates map[string]*State, Graph *gographviz.G
     }
 }
 
-func VisualizeAFD(state *State) ([]byte, error) {
+func VisualizeAFD(state *State) []byte {
     g := gographviz.NewGraph()
     g.SetName("G")
     g.SetDir(true)
@@ -215,7 +215,7 @@ func VisualizeAFD(state *State) ([]byte, error) {
 
     graphvizGraph, err := graphviz.ParseBytes([]byte(s))
     if err != nil {
-        return nil, err
+        return nil
     }
 
     gv := graphviz.New()
@@ -223,10 +223,10 @@ func VisualizeAFD(state *State) ([]byte, error) {
 
     var buf bytes.Buffer
     if err := gv.Render(graphvizGraph, graphviz.PNG, &buf); err != nil {
-        return nil, err
+        return nil
     }
 
-    return buf.Bytes(), nil
+    return buf.Bytes()
 }
 
 
