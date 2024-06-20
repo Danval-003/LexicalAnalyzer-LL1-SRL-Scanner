@@ -350,8 +350,20 @@ func SimulateTable(slr SLR, input string) ([]byte ,error) {
 			}
 			steps = append(steps, step)
 			_ = steps
+			// List for expected tokens
+			runeExpected := []string{}
+			// Iterate over the table
+			for _, value := range table[state] {
+				runeExpected = append(runeExpected, value.Symbol)
+			}
+			// Convert list to string
+			expected := strings.Join(runeExpected, ", ")
+
 			// Error
-			return nil, fmt.Errorf("error en la tabla de análisis sintáctico, no existe acción para: "+symbol)
+			if symbol == "$" {
+				return nil, fmt.Errorf("error en la tabla de análisis sintáctico, se esperaban los tokens: "+expected)
+			}
+			return nil, fmt.Errorf("error en la tabla de análisis sintáctico, no existe acción para: "+symbol+" se esperaban los tokens: "+expected)
 		}
 		step := Step{ Number: len(steps)}
 		// Create a copy of mapSimulate
